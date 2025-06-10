@@ -1,4 +1,5 @@
 import { parse } from 'csv-parse/browser/esm'
+import type { LatLngExpression } from 'leaflet'
 import { type ChangeEvent, useEffect, useState } from 'react'
 import { format, parseISO } from 'date-fns'
 import { Button, styled } from '@mui/material'
@@ -14,7 +15,6 @@ import {
 import type { DataRecord } from './types/Data'
 
 import './App.css'
-import type { LatLngExpression } from 'leaflet'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
