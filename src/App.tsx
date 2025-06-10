@@ -1,12 +1,20 @@
 import { parse } from 'csv-parse/browser/esm'
 import { type ChangeEvent, useEffect, useState } from 'react'
-// import { format, parseISO } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import { Button, styled } from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
-import { MapContainer, TileLayer, Polyline } from 'react-leaflet'
+import {
+  MapContainer,
+  TileLayer,
+  Polyline,
+  Marker,
+  Popup,
+  Tooltip,
+} from 'react-leaflet'
 import type { DataRecord } from './types/Data'
 
 import './App.css'
+import type { LatLngExpression } from 'leaflet'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -30,7 +38,15 @@ function App() {
   const [centerPosition, setCenterPosition] = useState<LocationData | null>(
     null,
   )
+  const [startPosition, setStartPosition] = useState<LocationData | null>(null)
+  const [finishPosition, setFinishPosition] = useState<LocationData | null>(
+    null,
+  )
   const [path, setPath] = useState<LocationData[]>([])
+
+  const segments = path
+    .slice(1)
+    .map((point, i) => [path[i], point] as LatLngExpression[])
 
   const initCenterPosition = () => {
     if (parsedData.length === 0) return
@@ -64,17 +80,51 @@ function App() {
     setPath(newPath)
   }
 
+  const initStartPosition = () => {
+    if (parsedData.length === 0) return
+
+    const gps = parsedData[0].GPS
+    if (!gps) return
+
+    const [lat, lng] = gps.split(' ').map(Number)
+    if (isNaN(lat) || isNaN(lng)) return
+
+    setStartPosition({ lat, lng })
+  }
+
+  const initFinishPosition = () => {
+    if (parsedData.length === 0) return
+
+    const gps = parsedData[parsedData.length - 1].GPS
+    if (!gps) return
+
+    const [lat, lng] = gps.split(' ').map(Number)
+    if (isNaN(lat) || isNaN(lng)) return
+
+    setFinishPosition({ lat, lng })
+  }
+
   useEffect(() => {
     initCenterPosition()
     initPath()
+    initStartPosition()
+    initFinishPosition()
   }, [parsedData])
 
-  // const parseDate = (date: string, time: string) => {
-  //   if (!date && !time) return ''
-  //
-  //   const fullDate = `${date} ${time}`
-  //   return format(parseISO(fullDate), 'dd/MM/yyyy HH:mm:ss')
-  // }
+  const parseDate = (date: string, time: string) => {
+    if (!date && !time) return ''
+
+    const fullDate = `${date} ${time}`
+    return format(parseISO(fullDate), 'dd.MM.yyyy HH:mm:ss')
+  }
+
+  const getPathColor = (alt: number): string => {
+    if (alt < 50) return 'green'
+
+    if (alt < 100) return 'yellow'
+
+    return 'red'
+  }
 
   const onUploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -132,7 +182,38 @@ function App() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          <Polyline pathOptions={{ color: 'red' }} positions={path} />
+          {startPosition && (
+            <Marker position={startPosition}>
+              <Popup>Flight origin point</Popup>
+            </Marker>
+          )}
+
+          {finishPosition && (
+            <Marker position={finishPosition}>
+              <Popup>Flight end point</Popup>
+            </Marker>
+          )}
+
+          {segments.map((segment, idx) => {
+            const record = parsedData[idx + 1]
+            const color = getPathColor(Number(record['Alt(m)']))
+
+            return (
+              <Polyline
+                key={idx}
+                positions={segment}
+                pathOptions={{ color }}
+                weight={6}
+              >
+                <Tooltip direction="top" sticky>
+                  <div>
+                    <strong>Altitude:</strong> {record['Alt(m)']} m<br />
+                    <strong>Time:</strong> {parseDate(record.Date, record.Time)}
+                  </div>
+                </Tooltip>
+              </Polyline>
+            )
+          })}
         </MapContainer>
       )}
     </>
