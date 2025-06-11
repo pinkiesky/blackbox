@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getPathColor } from './path.ts'
+import { getPathColor } from './'
 
 describe('path color', () => {
   it('should return the correct color for a given path', () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseCsv } from './parse.ts'
+import { parseCsv } from './'
 
 describe('parseCsv', () => {
   it('should parse CSV text into records', async () => {
