@@ -1,11 +1,15 @@
 import { format, parseISO } from 'date-fns'
 
-export const parseDate = (date: string, time: string) => {
+export const parseDate = (date: string, time?: string) => {
   if (!date && !time) return ''
 
-  const formattedDate = date || format(new Date(), 'yyyy-MM-dd')
-  const formattedTime = time || '00:00:00.000'
-  const isoString = `${formattedDate}T${formattedTime}`
+  let isoString = date || format(new Date(), 'yyyy-MM-dd')
+  let formatStr = 'dd.MM.yyyy'
 
-  return format(parseISO(isoString), 'dd.MM.yyyy HH:mm:ss')
+  if (time) {
+    isoString += `T${time}`
+    formatStr += `HH:mm:ss`
+  }
+
+  return format(parseISO(isoString), formatStr)
 }

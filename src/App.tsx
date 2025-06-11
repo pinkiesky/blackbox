@@ -1,28 +1,35 @@
-import { type ChangeEvent, useState } from 'react'
+import { type ChangeEvent } from 'react'
 import { Button } from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import { useLocalStorage } from '@uidotdev/usehooks'
 import type { DataRecord } from '@/types/data'
 import { parseCsv } from '@/utils/parse'
 import VisuallyHiddenInput from '@/components/ui/VisuallyHiddenInput.tsx'
+import MapControls from '@/components/MapControls/MapControls.tsx'
 import Map from '@/components/Map/Map.tsx'
 
 import './App.css'
+import { parseDate } from '@/utils/date'
 
 function App() {
-  const [parsedData, setParsedData] = useState<DataRecord[]>([])
+  const [data, saveData] = useLocalStorage<DataRecord[]>('cvs-data', [])
 
   const onUploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
 
     const text = await file.text()
-    setParsedData(await parseCsv(text))
+    saveData(await parseCsv(text))
+  }
+
+  const clearData = () => {
+    saveData([])
   }
 
   return (
     <>
-      {parsedData.length === 0 && (
-        <>
+      {data.length === 0 && (
+        <div className="app">
           <h1>Blackbox</h1>
 
           <Button
@@ -40,10 +47,20 @@ function App() {
               accept=".csv"
             />
           </Button>
-        </>
+        </div>
       )}
 
-      {parsedData.length > 0 && <Map data={parsedData} />}
+      {data.length > 0 && (
+        <div className="map">
+          <div className="map__info">
+            <h2 className="map__title">Blackbox {parseDate(data[0].Date)}</h2>
+
+            <MapControls clear={clearData} />
+          </div>
+
+          <Map data={data} />
+        </div>
+      )}
     </>
   )
 }
