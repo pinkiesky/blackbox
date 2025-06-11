@@ -70,10 +70,17 @@ const Map: FC<Props> = ({ data }) => {
                 weight={6}
               >
                 <Tooltip direction="top" sticky>
-                  <div>
-                    <strong>Altitude:</strong> {record['Alt(m)']} m<br />
-                    <strong>Time:</strong> {parseDate(record.Date, record.Time)}
-                  </div>
+                  <strong>Altitude:</strong> {record['Alt(m)']} m
+                  <br />
+                  <strong>Time:</strong> {parseDate(record.Date, record.Time)}
+                  <br />
+                  <strong>Speed:</strong> {record['GSpd(kmh)']} km/h
+                  <br />
+                  <strong>Heading:</strong> {record['Hdg(°)']}°
+                  <br />
+                  <strong>Sats:</strong> {record['Sats']}
+                  <br />
+                  <strong>Bat:</strong> {record['Bat%(%)']}%
                 </Tooltip>
               </Polyline>
             )
