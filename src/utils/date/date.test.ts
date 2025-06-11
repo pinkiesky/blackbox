@@ -1,7 +1,7 @@
 import { expect, it, describe } from 'vitest'
 import { parseDate } from './'
 
-describe('parsing date', () => {
+describe('Parsing date', () => {
   it('parses date and time correctly', () => {
     expect(parseDate('2023-10-01', '12:00:00.000')).toBe('01.10.2023 12:00:00')
   })

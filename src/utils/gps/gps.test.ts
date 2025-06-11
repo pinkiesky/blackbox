@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { parseGpsLocation } from './'
 
-describe('GPS Utils', () => {
+describe('GPS', () => {
   it('should parse GPS coordinates correctly', () => {
     const result = parseGpsLocation('1 2')
     expect(result).toEqual({ lat: 1, lng: 2 })

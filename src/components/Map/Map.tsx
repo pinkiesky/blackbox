@@ -1,4 +1,4 @@
-import { type FC, useEffect, useState } from 'react'
+import { type FC, useEffect } from 'react'
 import {
   MapContainer,
   Marker,
@@ -7,11 +7,10 @@ import {
   TileLayer,
   Tooltip,
 } from 'react-leaflet'
-import type { LatLngExpression } from 'leaflet'
-import { parseGpsLocation } from '@/utils/gps'
+import type { DataRecord } from '@/types/data'
 import { getPathColor } from '@/utils/path'
 import { parseDate } from '@/utils/date'
-import type { DataRecord, LocationData } from '@/types/data'
+import { useMapPositions } from '@/hooks/useMapPositions'
 
 import styles from './Map.module.css'
 
@@ -20,78 +19,22 @@ interface Props {
 }
 
 const Map: FC<Props> = ({ data }) => {
-  const [centerPosition, setCenterPosition] = useState<LocationData | null>(
-    null,
-  )
-  const [startPosition, setStartPosition] = useState<LocationData | null>(null)
-  const [finishPosition, setFinishPosition] = useState<LocationData | null>(
-    null,
-  )
-  const [path, setPath] = useState<LocationData[]>([])
-
-  const segments = path
-    .slice(1)
-    .map((point, i) => [path[i], point] as LatLngExpression[])
-
-  const initCenterPosition = () => {
-    if (data.length === 0) return
-
-    const arrayCenterIndex = Math.floor(data.length / 2)
-
-    const gps = data[arrayCenterIndex].GPS
-    if (!gps) return
-
-    const [lat, lng] = gps.split(' ').map(Number)
-    if (isNaN(lat) || isNaN(lng)) return
-
-    setCenterPosition({ lat, lng })
-  }
-
-  const initPath = () => {
-    if (data.length === 0) return
-
-    const newPath: LocationData[] = data
-      .map((record) => {
-        const gps = record.GPS
-        if (!gps) return null
-
-        const parsedGps = parseGpsLocation(gps)
-        if (!parsedGps) return null
-
-        return { lat: parsedGps.lat, lng: parsedGps.lng }
-      })
-      .filter((location): location is LocationData => location !== null)
-
-    setPath(newPath)
-  }
-
-  const initStartPosition = () => {
-    const gps = data[0].GPS
-    if (!gps) return
-
-    const parsedGps = parseGpsLocation(gps)
-    if (!parsedGps) return
-
-    setStartPosition({ lat: parsedGps.lat, lng: parsedGps.lng })
-  }
-
-  const initFinishPosition = () => {
-    const gps = data[data.length - 1].GPS
-    if (!gps) return
-
-    const parsedGps = parseGpsLocation(gps)
-    if (!parsedGps) return
-
-    setFinishPosition({ lat: parsedGps.lat, lng: parsedGps.lng })
-  }
+  const {
+    startPosition,
+    finishPosition,
+    centerPosition,
+    segments,
+    initCenterPosition,
+    initPath,
+    initStartPosition,
+    initFinishPosition,
+  } = useMapPositions(data)
 
   useEffect(() => {
     initCenterPosition()
     initPath()
     initStartPosition()
     initFinishPosition()
-
-    console.log(data)
   }, [data])
 
   return (
