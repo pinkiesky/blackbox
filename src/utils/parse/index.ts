@@ -1,5 +1,5 @@
 import { parse } from 'csv-parse/browser/esm'
-import type { DataRecord } from '@/types/Data'
+import type { DataRecord } from '@/types/data'
 
 export function parseCsv(text: string): Promise<DataRecord[]> {
   return new Promise((resolve, reject) => {
