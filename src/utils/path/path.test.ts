@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { getPathColor } from './'
 
-describe('path color', () => {
+describe('Get path color', () => {
   it('should return the correct color for a given path', () => {
     expect(getPathColor(30)).toBe('green')
     expect(getPathColor(150)).toBe('red')

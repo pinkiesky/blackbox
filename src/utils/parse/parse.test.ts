@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { parseCsv } from './'
 
-describe('parseCsv', () => {
+describe('Parse CSV', () => {
   it('should parse CSV text into records', async () => {
     const csvText = `name,age` + `\nAlice,30` + `\nBob,25`
 
