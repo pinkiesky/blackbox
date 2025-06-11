@@ -8,7 +8,7 @@ export const parseDate = (date: string, time?: string) => {
 
   if (time) {
     isoString += `T${time}`
-    formatStr += `HH:mm:ss`
+    formatStr += ` HH:mm:ss`
   }
 
   return format(parseISO(isoString), formatStr)

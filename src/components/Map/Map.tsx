@@ -11,6 +11,8 @@ import type { DataRecord } from '@/types/data'
 import { getPathColor } from '@/utils/path'
 import { parseDate } from '@/utils/date'
 import { useMapPositions } from '@/hooks/useMapPositions'
+import { StartIcon } from '@/components/icons/StartIcon'
+import { FinishIcon } from '@/components/icons/FinishIcon'
 
 import styles from './Map.module.css'
 
@@ -47,13 +49,13 @@ const Map: FC<Props> = ({ data }) => {
           />
 
           {startPosition && (
-            <Marker position={startPosition}>
+            <Marker position={startPosition} icon={StartIcon}>
               <Popup>Flight origin point</Popup>
             </Marker>
           )}
 
           {finishPosition && (
-            <Marker position={finishPosition}>
+            <Marker position={finishPosition} icon={FinishIcon}>
               <Popup>Flight end point</Popup>
             </Marker>
           )}
