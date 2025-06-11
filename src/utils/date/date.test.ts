@@ -1,5 +1,5 @@
 import { expect, it, describe } from 'vitest'
-import { parseDate } from './date.ts'
+import { parseDate } from './'
 
 describe('parsing date', () => {
   it('parses date and time correctly', () => {

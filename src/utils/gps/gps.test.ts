@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseGpsLocation } from './gps.ts'
+import { parseGpsLocation } from './'
 
 describe('GPS Utils', () => {
   it('should parse GPS coordinates correctly', () => {
