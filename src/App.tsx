@@ -1,8 +1,8 @@
-import { parse } from 'csv-parse/browser/esm'
 import { type ChangeEvent, useState } from 'react'
 import { Button } from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import type { DataRecord } from './types/Data'
+import { parseCsv } from '@/utils/parse/parse.ts'
 import VisuallyHiddenInput from '@/components/ui/VisuallyHiddenInput.tsx'
 import Map from '@/components/Map/Map.tsx'
 
@@ -16,23 +16,7 @@ function App() {
     if (!file) return
 
     const text = await file.text()
-
-    parse(
-      text,
-      {
-        columns: true,
-        skip_empty_lines: true,
-        trim: true,
-      },
-      (err, records) => {
-        if (err) {
-          console.error(err)
-          return
-        }
-
-        setParsedData(records)
-      },
-    )
+    setParsedData(await parseCsv(text))
   }
 
   return (
