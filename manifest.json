@@ -1,6 +1,6 @@
 {
   "name": "Blackbox",
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
   "registerType": "autoUpdate",
   "includeAssets": ["icon.svg"],
@@ -19,14 +19,14 @@
   "screenshots": [
     {
       "src": "/screenshot-mobile1.png",
-      "sizes": "640x320",
+      "sizes": "640x1394",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Main page"
     },
     {
       "src": "/screenshot-mobile2.png",
-      "sizes": "640x320",
+      "sizes": "640x1394",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Flight details"
@@ -34,14 +34,14 @@
 
     {
       "src": "/screenshot1.png",
-      "sizes": "640x1394",
+      "sizes": "640x320",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Main page"
     },
     {
       "src": "/screenshot2.png",
-      "sizes": "640x1394",
+      "sizes": "640x320",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Flight details"

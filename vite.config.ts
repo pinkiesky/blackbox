@@ -7,10 +7,11 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      injectRegister: 'auto',
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
       manifest: {
         name: 'Blackbox',
+        start_url: '/',
         icons: [
           {
             src: '/icon.svg',
