@@ -1,7 +1,7 @@
 export const getPathColor = (altitude: number): string => {
-  if (isNaN(altitude) || altitude < 50) return 'green'
+  if (isNaN(altitude) || altitude < 50) return '#2DCCBC'
 
-  if (altitude < 100) return 'yellow'
+  if (altitude < 100) return '#48C3D4'
 
-  return 'red'
+  return '#4C7DC7'
 }
