@@ -1,3 +1,8 @@
+export interface LocationData {
+  lat: number
+  lng: number
+}
+
 export interface DataRecord {
   Date: string // YYYY-MM-DD
   Time: string // HH:mm:ss.SSS
