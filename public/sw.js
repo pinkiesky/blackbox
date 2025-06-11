@@ -3,13 +3,13 @@ const ASSETS = [
   '/',
   '/index.html',
   '/styles.css',
-  '/public/icon.svg',
-  '/public/icon-144x144.png',
-  '/public/icon-192x192.png',
-  '/public/screenshot1.png',
-  '/public/screenshot2.png',
-  '/public/screenshot-mobile1.png',
-  '/public/screenshot-mobile2.png',
+  '/icon.svg',
+  '/icon-144x144.png',
+  '/icon-192x192.png',
+  '/screenshot1.png',
+  '/screenshot2.png',
+  '/screenshot-mobile1.png',
+  '/screenshot-mobile2.png',
 ]
 
 self.addEventListener('install', (evt) => {
