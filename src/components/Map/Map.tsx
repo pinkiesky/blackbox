@@ -8,10 +8,10 @@ import {
   Tooltip,
 } from 'react-leaflet'
 import type { LatLngExpression } from 'leaflet'
-import { parseGpsLocation } from '@/utils/gps/gps.ts'
-import { getPathColor } from '@/utils/path/path.ts'
-import { parseDate } from '@/utils/date/date.ts'
-import type { DataRecord, LocationData } from '@/types/Data'
+import { parseGpsLocation } from '@/utils/gps'
+import { getPathColor } from '@/utils/path'
+import { parseDate } from '@/utils/date'
+import type { DataRecord, LocationData } from '@/types/data'
 
 import styles from './Map.module.css'
 
