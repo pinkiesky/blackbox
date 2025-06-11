@@ -16,7 +16,7 @@ export interface DataRecord {
   'TRSS(dB)': number
   'TQly(%)': number
   'TSNR(dB)': number
-  GPS: string // "lat lon"
+  GPS: string // "lat lng"
   'GSpd(kmh)': number
   'Hdg(°)': number
   'Alt(m)': number

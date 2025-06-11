@@ -8,9 +8,9 @@ import {
   Tooltip,
 } from 'react-leaflet'
 import type { LatLngExpression } from 'leaflet'
-import { parseGpsLocation } from '@/utils/gps.ts'
-import { getPathColor } from '@/utils/path.ts'
-import { parseDate } from '@/utils/date.ts'
+import { parseGpsLocation } from '@/utils/gps/gps.ts'
+import { getPathColor } from '@/utils/path/path.ts'
+import { parseDate } from '@/utils/date/date.ts'
 import type { DataRecord, LocationData } from '@/types/Data'
 
 import styles from './Map.module.css'
@@ -90,6 +90,8 @@ const Map: FC<Props> = ({ data }) => {
     initPath()
     initStartPosition()
     initFinishPosition()
+
+    console.log(data)
   }, [data])
 
   return (
