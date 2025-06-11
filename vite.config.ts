@@ -7,9 +7,10 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['icon.svg'],
       manifest: {
         name: 'Blackbox',
-        start_url: '/',
         icons: [
           {
             src: '/icon.svg',
@@ -19,7 +20,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,ts,css,html,ico,png,svg,webmanifest}'],
+        globPatterns: ['**/*.(js|ts|css|html|png|svg)'],
       },
     }),
   ],
