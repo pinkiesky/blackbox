@@ -1,28 +1,30 @@
 import { create } from 'zustand'
 import { FiltersType } from '@/types/filters.ts'
-import type { FlightDate } from '@/hooks/useFlightDates'
+import type { FlightItem } from '@/hooks/useFlightFilter'
+import type { DataRecord } from '@/types/data.ts'
 
-export type FiltersData = Record<FiltersType, FlightDate<any>>
+export type FiltersData = Record<FiltersType, FlightItem<any>>
 
 interface FiltersState {
   currentFilter: FiltersType
   filters: FiltersData
   setCurrentFilter: (filter: FiltersType) => void
-  setFilter: (filter: keyof FiltersData, value: FlightDate<any>) => void
+  setFilter: (filter: keyof FiltersData, value: FlightItem<any>) => void
   setFilters: (filters: FiltersData) => void
 }
 
-export const getPureFilter = (): FlightDate<any> => ({
+export const getPureFilter = (key: keyof DataRecord): FlightItem<any> => ({
   date: '',
   time: '',
   normalizedDate: '',
-  item: null,
+  value: null,
+  key,
 })
 
 export const getPureFilters = (): FiltersData => ({
-  [FiltersType.ALTITUDE]: getPureFilter(),
-  [FiltersType.BAT]: getPureFilter(),
-  [FiltersType.SPEED]: getPureFilter(),
+  [FiltersType.ALTITUDE]: getPureFilter('Alt(m)'),
+  [FiltersType.BAT]: getPureFilter('Bat%(%)'),
+  [FiltersType.SPEED]: getPureFilter('GSpd(kmh)'),
 })
 
 export const useFiltersStore = create<FiltersState>((set) => ({
@@ -31,7 +33,7 @@ export const useFiltersStore = create<FiltersState>((set) => ({
   setCurrentFilter: (newFilter: FiltersType) =>
     set({ currentFilter: newFilter }),
   setFilters: (newFilters: FiltersData) => set({ filters: newFilters }),
-  setFilter: (filter: keyof FiltersData, value: FlightDate<any>) =>
+  setFilter: (filter: keyof FiltersData, value: FlightItem<any>) =>
     set((state) => ({
       filters: {
         ...state.filters,

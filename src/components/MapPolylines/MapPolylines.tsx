@@ -7,7 +7,6 @@ import { parseDate } from '@/utils/date'
 import { parseGpsLocation } from '@/utils/gps'
 import { useDataStore } from '@/store/data.ts'
 import { useFiltersStore } from '@/store/filters.ts'
-import { FiltersType } from '@/types/filters.ts'
 
 interface Props {
   segments: LatLngExpression[][]
@@ -15,28 +14,28 @@ interface Props {
 
 const MapPolylines: FC<Props> = ({ segments }) => {
   const { data } = useDataStore()
-  const { filters } = useFiltersStore()
+  const { currentFilter, filters } = useFiltersStore()
   const map = useMap()
-
   const polylineRefs = useRef<{ [idx: number]: L.Polyline | null }>({})
 
   useEffect(() => {
     Object.values(polylineRefs.current).forEach((pl) => pl?.closeTooltip())
 
-    const altitude = filters[FiltersType.ALTITUDE]
-    if (!altitude) return
+    const filter = filters[currentFilter]
+    if (!filter) return
 
     const idx = data.findIndex((rec) => {
-      const isAltEqual = rec['Alt(m)'] === altitude.item
+      const isValuesEqual = rec[filter.key] === filter.value
+      const isDateEqual = rec.Date === filter.date
+      const isTimeEqual = rec.Time.split('.')[0] === filter.time
 
-      const isDateEqual = rec.Date === altitude.date
-      const isTimeEqual = rec.Time.split('.')[0] === altitude.time
-
-      return isAltEqual && isDateEqual && isTimeEqual
+      return isValuesEqual && isDateEqual && isTimeEqual
     })
+
     if (idx < 0) return
 
     const loc = parseGpsLocation(data[idx].GPS)
+
     if (loc) {
       map.flyTo({ lat: loc.lat, lng: loc.lng }, 18)
     }

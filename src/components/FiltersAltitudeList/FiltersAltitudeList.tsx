@@ -1,7 +1,13 @@
 import type { FC } from 'react'
-import { List, ListItem, ListItemButton, ListItemText } from '@mui/material'
+import {
+  Chip,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+} from '@mui/material'
 import { FiltersType } from '@/types/filters.ts'
-import { useFlightDates } from '@/hooks/useFlightDates'
+import { useFlightFilter } from '@/hooks/useFlightFilter'
 import { useFiltersStore } from '@/store/filters.ts'
 
 import styles from './styles.module.css'
@@ -9,21 +15,38 @@ import styles from './styles.module.css'
 const FiltersAltitudeList: FC = () => {
   const { setFilter } = useFiltersStore()
 
-  const { formattedDates } = useFlightDates<'Alt(m)'>({
-    item: 'Alt(m)',
+  const { formattedItems } = useFlightFilter<'Alt(m)'>({
+    value: 'Alt(m)',
   })
 
   return (
     <List className={styles.list}>
-      {formattedDates.map((date, index) => (
+      {formattedItems.map((item, index) => (
         <ListItem key={index} disablePadding>
           <ListItemButton
             disableGutters
-            onClick={() => setFilter(FiltersType.ALTITUDE, date)}
+            onClick={() => setFilter(FiltersType.ALTITUDE, item)}
           >
             <ListItemText>
-              <div className={styles.date}>{date.normalizedDate}</div>
-              <div>{date.item} m</div>
+              <div className={styles.date}>{item.normalizedDate}</div>
+              <div style={{ display: 'inline-block' }}>{item.value} m</div>
+
+              {item.isMin && (
+                <Chip
+                  label="MIN"
+                  color="success"
+                  size="small"
+                  sx={{ marginLeft: 1 }}
+                />
+              )}
+              {item.isMax && (
+                <Chip
+                  label="MAX"
+                  color="error"
+                  size="small"
+                  sx={{ marginLeft: 1 }}
+                />
+              )}
             </ListItemText>
           </ListItemButton>
         </ListItem>
