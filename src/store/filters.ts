@@ -19,6 +19,8 @@ export const getPureFilter = (key: keyof DataRecord): FlightItem<any> => ({
   normalizedDate: '',
   value: null,
   key,
+  isMin: false,
+  isMax: false,
 })
 
 export const getPureFilters = (): FiltersData => ({
