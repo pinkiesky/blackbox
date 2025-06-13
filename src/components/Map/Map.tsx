@@ -1,15 +1,24 @@
 import { type FC, useEffect } from 'react'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
+import type { CSSProperties } from '@mui/material'
 import type { DataRecord } from '@/types/data'
 import { useMapPositions } from '@/hooks/useMapPositions'
 import { StartIcon } from '@/components/icons/StartIcon'
 import { FinishIcon } from '@/components/icons/FinishIcon'
 import MapPolylines from '@/components/MapPolylines/MapPolylines.tsx'
 
-import styles from './styles.module.css'
-
 interface Props {
   data: DataRecord[]
+}
+
+const styles: Record<string, CSSProperties> = {
+  map: {
+    width: '100%',
+    height: '100%',
+    minWidth: '1000px',
+    minHeight: '900px',
+    borderRadius: '4px',
+  },
 }
 
 const Map: FC<Props> = ({ data }) => {
@@ -34,7 +43,7 @@ const Map: FC<Props> = ({ data }) => {
   return (
     <>
       {centerPosition && (
-        <MapContainer center={centerPosition} zoom={16} className={styles.map}>
+        <MapContainer center={centerPosition} zoom={16} style={styles.map}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

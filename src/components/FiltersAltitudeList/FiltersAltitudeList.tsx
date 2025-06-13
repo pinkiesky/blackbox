@@ -5,12 +5,30 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  type SxProps,
+  Typography,
 } from '@mui/material'
 import { FiltersType } from '@/types/filters.ts'
 import { useFlightFilter } from '@/hooks/useFlightFilter'
 import { useFiltersStore } from '@/store/filters.ts'
 
-import styles from './styles.module.css'
+const styles: Record<string, SxProps> = {
+  list: {
+    position: 'relative',
+    overflow: 'auto',
+    maxHeight: '630px',
+  },
+  date: {
+    fontSize: '12px',
+    color: '#b3b3b3',
+  },
+  value: {
+    display: 'inline-block',
+  },
+  chip: {
+    marginLeft: '8px',
+  },
+}
 
 const FiltersAltitudeList: FC = () => {
   const { setFilter } = useFiltersStore()
@@ -20,7 +38,7 @@ const FiltersAltitudeList: FC = () => {
   })
 
   return (
-    <List className={styles.list}>
+    <List sx={styles.list}>
       {formattedItems.map((item, index) => (
         <ListItem key={index} disablePadding>
           <ListItemButton
@@ -28,24 +46,19 @@ const FiltersAltitudeList: FC = () => {
             onClick={() => setFilter(FiltersType.ALTITUDE, item)}
           >
             <ListItemText>
-              <div className={styles.date}>{item.normalizedDate}</div>
-              <div style={{ display: 'inline-block' }}>{item.value} m</div>
+              <Typography sx={styles.date}>{item.normalizedDate}</Typography>
+              <Typography sx={styles.value}>{item.value} m</Typography>
 
               {item.isMin && (
                 <Chip
                   label="MIN"
                   color="success"
                   size="small"
-                  sx={{ marginLeft: 1 }}
+                  sx={styles.chip}
                 />
               )}
               {item.isMax && (
-                <Chip
-                  label="MAX"
-                  color="error"
-                  size="small"
-                  sx={{ marginLeft: 1 }}
-                />
+                <Chip label="MAX" color="error" size="small" sx={styles.chip} />
               )}
             </ListItemText>
           </ListItemButton>

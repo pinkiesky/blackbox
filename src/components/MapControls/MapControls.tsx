@@ -6,15 +6,19 @@ import {
   FormControlLabel,
   RadioGroup,
   Typography,
+  Box,
+  type SxProps,
 } from '@mui/material'
 import { FiltersType } from '@/types/filters.ts'
 import { useFiltersStore } from '@/store/filters'
 import FiltersAltitudeList from '@/components/FiltersAltitudeList/FiltersAltitudeList.tsx'
 
-import styles from './styles.module.css'
-
 interface Props {
   clear: () => void
+}
+
+const styles: SxProps = {
+  textAlign: 'left',
 }
 
 const MapControls: FC<Props> = ({ clear }) => {
@@ -25,7 +29,7 @@ const MapControls: FC<Props> = ({ clear }) => {
   }
 
   return (
-    <div className={styles.root}>
+    <Box sx={styles}>
       <Button variant="contained" fullWidth onClick={clear}>
         Clear data
       </Button>
@@ -57,7 +61,7 @@ const MapControls: FC<Props> = ({ clear }) => {
       </FormControl>
 
       {currentFilter === FiltersType.ALTITUDE && <FiltersAltitudeList />}
-    </div>
+    </Box>
   )
 }
 
