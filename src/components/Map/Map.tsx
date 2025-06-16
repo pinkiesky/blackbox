@@ -1,7 +1,7 @@
 import { type FC, useEffect } from 'react'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 import type { CSSProperties } from '@mui/material'
-import type { Log, LogRecord, RadiomasterLogRecord } from '@/types/data'
+import type { Log, LogRecord } from '@/types/data'
 import { useMapPositions } from '@/hooks/useMapPositions'
 import { StartIcon } from '@/components/icons/StartIcon'
 import { FinishIcon } from '@/components/icons/FinishIcon'

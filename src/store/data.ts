@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Log, RadiomasterLogRecord } from '@/types/data'
+import type { Log } from '@/types/data'
 
 interface DataState {
   data: Log | null
