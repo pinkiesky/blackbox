@@ -1,7 +1,7 @@
 import { type FC } from 'react'
-import { type LatLngLiteral, type PathOptions } from 'leaflet'
+import { type PathOptions } from 'leaflet'
 import { Polyline } from 'react-leaflet'
-import type { Log, Segment } from '@/types/data'
+import type { Segment } from '@/types/data'
 
 interface Props {
   segments: Segment[]

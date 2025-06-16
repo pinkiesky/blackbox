@@ -21,7 +21,7 @@ const styles: SxProps = {
 }
 
 const MapControls: FC<Props> = ({ clear }) => {
-  const { currentFilter, setCurrentFilter } = useFiltersStore()
+  const { setCurrentFilter } = useFiltersStore()
 
   const onFilterChanged = (e: ChangeEvent<HTMLInputElement>) => {
     setCurrentFilter(Number(e.target.value) as unknown as FiltersType)

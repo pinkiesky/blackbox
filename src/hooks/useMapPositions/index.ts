@@ -1,7 +1,5 @@
 import type { LocationData, Log, LogRecord, Segment } from '@/types/data'
-import { compareObjectsRecursively, getColorBetweenTwoColors } from '@/utils'
-import type { LatLngExpression } from 'leaflet'
-import { config } from 'process'
+import { compareObjectsRecursively } from '@/utils'
 import { useMemo, useState } from 'react'
 
 interface UseMapPositionsReturn {
@@ -71,7 +69,7 @@ export function useMapPositions(log: Log, lch: LineConfigHandler): UseMapPositio
     }
 
     return segments
-  }, [path]);
+  }, [lch, log]);
 
   const initCenterPosition = () => {
     if (log.data.length === 0) return
