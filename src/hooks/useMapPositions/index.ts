@@ -1,7 +1,8 @@
-import type { DataRecord, LocationData } from '@/types/data'
+import type { LocationData, Log, LogRecord, Segment } from '@/types/data'
+import { compareObjectsRecursively, getColorBetweenTwoColors } from '@/utils'
 import type { LatLngExpression } from 'leaflet'
-import { useState } from 'react'
-import { parseGpsLocation } from '@/utils/gps'
+import { config } from 'process'
+import { useMemo, useState } from 'react'
 
 interface UseMapPositionsReturn {
   /* States */
@@ -9,7 +10,7 @@ interface UseMapPositionsReturn {
   centerPosition: LocationData | null
   startPosition: LocationData | null
   finishPosition: LocationData | null
-  segments: LatLngExpression[][]
+  segments: Segment[]
 
   /* Methods */
   initCenterPosition: () => void
@@ -18,7 +19,17 @@ interface UseMapPositionsReturn {
   initFinishPosition: () => void
 }
 
-export function useMapPositions(data: DataRecord[]): UseMapPositionsReturn {
+export type LineConfigHandler = (
+  record: LogRecord,
+  prevRecord: LogRecord | null,
+  perc: number,
+  index: number,
+  log: Log,
+  segments: Segment[],
+  currentSegment: Segment | null,
+) => { opacity: number; color: string }
+
+export function useMapPositions(log: Log, lch: LineConfigHandler): UseMapPositionsReturn {
   const [centerPosition, setCenterPosition] = useState<LocationData | null>(
     null,
   )
@@ -28,60 +39,67 @@ export function useMapPositions(data: DataRecord[]): UseMapPositionsReturn {
   )
   const [path, setPath] = useState<LocationData[]>([])
 
-  const segments = path
-    .slice(1)
-    .map((point, i) => [path[i], point] as LatLngExpression[])
+  const segments: Segment[] = useMemo(() => {
+    const segments: Segment[] = []
+
+    let currentSegment: Segment | null = null
+    for (let i = 0; i < log.data.length; i++) {
+      const record = log.data[i]
+      const perc = record.flightTimeSec / log.durationSec;
+
+      const recordConfig = lch(record, log.data[i - 1] ?? null, perc, i, log, segments, currentSegment)
+
+      if (!currentSegment) {
+        currentSegment = {
+          points: [record.coordinates],
+          config: recordConfig,
+        }
+
+        continue;
+      }
+
+      currentSegment.points.push(record.coordinates)
+      if (!compareObjectsRecursively(currentSegment.config, recordConfig)) {
+        segments.push(currentSegment)
+        i--;
+        currentSegment = null
+      }
+    }
+
+    if (currentSegment) {
+      segments.push(currentSegment)
+    }
+
+    return segments
+  }, [path]);
 
   const initCenterPosition = () => {
-    if (data.length === 0) return
+    if (log.data.length === 0) return
 
-    const arrayCenterIndex = Math.floor(data.length / 2)
+    const arrayCenterIndex = Math.floor(log.data.length / 2)
+    const gps = log.data[arrayCenterIndex].coordinates
 
-    const gps = data[arrayCenterIndex].GPS
-    if (!gps) return
-
-    const [lat, lng] = gps.split(' ').map(Number)
-    if (isNaN(lat) || isNaN(lng)) return
-
-    setCenterPosition({ lat, lng })
+    setCenterPosition(gps)
   }
 
   const initPath = () => {
-    if (data.length === 0) return
+    if (log.data.length === 0) return
 
-    const newPath: LocationData[] = data
-      .map((record) => {
-        const gps = record.GPS
-        if (!gps) return null
-
-        const parsedGps = parseGpsLocation(gps)
-        if (!parsedGps) return null
-
-        return { lat: parsedGps.lat, lng: parsedGps.lng }
+    const newPath: LocationData[] = log.data
+      .map(({ coordinates }): LocationData => {
+        return { ...coordinates }
       })
-      .filter((location): location is LocationData => location !== null)
 
     setPath(newPath)
   }
 
   const initStartPosition = () => {
-    const gps = data[0].GPS
-    if (!gps) return
-
-    const parsedGps = parseGpsLocation(gps)
-    if (!parsedGps) return
-
-    setStartPosition({ lat: parsedGps.lat, lng: parsedGps.lng })
+    setStartPosition(log.data[0].coordinates)
   }
 
   const initFinishPosition = () => {
-    const gps = data[data.length - 1].GPS
-    if (!gps) return
-
-    const parsedGps = parseGpsLocation(gps)
-    if (!parsedGps) return
-
-    setFinishPosition({ lat: parsedGps.lat, lng: parsedGps.lng })
+    const gps = log.data[log.data.length - 1].coordinates
+    setFinishPosition({ lat: gps.lat, lng: gps.lng })
   }
 
   return {

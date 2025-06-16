@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { FiltersType } from '@/types/filters.ts'
 import type { FlightItem } from '@/hooks/useFlightFilter'
-import type { DataRecord } from '@/types/data.ts'
+import type { RadiomasterLogRecord } from '@/types/data.ts'
 
 export type FiltersData = Record<FiltersType, FlightItem<any>>
 
@@ -13,7 +13,7 @@ interface FiltersState {
   setFilters: (filters: FiltersData) => void
 }
 
-export const getPureFilter = (key: keyof DataRecord): FlightItem<any> => ({
+export const getPureFilter = (key: keyof RadiomasterLogRecord): FlightItem<any> => ({
   date: '',
   time: '',
   normalizedDate: '',
