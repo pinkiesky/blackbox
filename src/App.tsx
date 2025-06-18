@@ -22,13 +22,13 @@ import Map from '@/components/Map/Map.tsx'
 import LogChart from '@/components/LogChart/LogChart.tsx'
 
 Chart.register(
+  DraggableSelectRangePlugin,
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
   Tooltip,
   Legend,
-  DraggableSelectRangePlugin,
 )
 
 const styles: Record<string, SxProps> = {
@@ -49,6 +49,9 @@ const styles: Record<string, SxProps> = {
     marginBottom: '12px',
     textAlign: 'left',
     fontSize: '20px',
+  },
+  chart: {
+    marginTop: '24px',
   },
 }
 
@@ -119,7 +122,9 @@ function App() {
             <Map data={data!} />
           </Box>
 
-          <LogChart />
+          <Box sx={styles.chart}>
+            <LogChart />
+          </Box>
         </>
       )}
     </>

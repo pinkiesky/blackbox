@@ -1,42 +1,66 @@
-import { type FC, useRef } from 'react'
-import { Chart } from 'react-chartjs-2'
-import { Chart as ChartJS } from 'chart.js'
+import { type FC, useEffect, useRef, useState } from 'react'
+import { Line } from 'react-chartjs-2'
 import { Box } from '@mui/material'
+import { getDraggableSelectRangeConfig } from '@/utils/chart'
+import { useDataStore } from '@/store/data.ts'
+import type { LocationData } from '@/types/data'
 
-export const LogChart: FC = () => {
-  const chartRef = useRef<ChartJS>(null)
+const LogChart: FC = () => {
+  const { data } = useDataStore()
+
+  const lineRef = useRef<any>(null)
+  const [verticalPositions, setVerticalPositions] = useState<number[]>([])
+  const [horizontalPositions, setHorizontalPositions] = useState<number[]>([])
+
+  useEffect(() => {
+    if (!data) return
+
+    const positions: LocationData[] = data.data.map((log) => log.coordinates)
+    const vertical = positions.map((pos) => pos.lat)
+    const horizontal = positions.map((pos) => pos.lng)
+
+    setVerticalPositions(vertical)
+    setHorizontalPositions(horizontal)
+  }, [data])
+
+  function getBackgroundColor() {
+    if (!lineRef.current) return
+
+    const canvas = lineRef.current.canvas
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
+    gradient.addColorStop(0, 'rgba(141,193,255,1)')
+    gradient.addColorStop(1, 'rgba(141,193,255,0)')
+
+    return gradient
+  }
 
   return (
     <Box>
-      <Chart
-        ref={chartRef}
-        type="line"
+      <Line
+        ref={lineRef}
+        options={{
+          responsive: true,
+          plugins: {
+            // @ts-ignore
+            draggableSelectRange: getDraggableSelectRangeConfig(),
+          },
+        }}
         data={{
-          labels: [1],
+          labels: horizontalPositions,
           datasets: [
             {
-              label: 'My First Dataset',
-              data: [65, 59, 80, 81, 56, 55, 40],
-              fill: false,
-              borderColor: 'rgb(75, 192, 192)',
-              tension: 0.1,
+              data: verticalPositions,
+              pointRadius: 0,
+              pointHoverRadius: 0,
+              borderColor: '#2388FF',
+              backgroundColor: getBackgroundColor(),
+              fill: true,
             },
           ],
         }}
-        // plugins={{
-        //   draggableSelectRange: {
-        //     enable: true,
-        //     text: {
-        //       enable: true,
-        //       offset: -15,
-        //       padding: 1,
-        //     },
-        //     onSelectComplete: (event) => {
-        //       console.log(event.range[0])
-        //       console.log(event.range[1])
-        //     },
-        //   },
-        // }}
       />
     </Box>
   )
