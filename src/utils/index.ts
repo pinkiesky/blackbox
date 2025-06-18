@@ -66,3 +66,71 @@ export function getColorBetweenTwoColors(
   // hex
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
+
+export interface ValueData {
+  max: number;
+  min: number;
+  average: number;
+  sum: number;
+  count: number;
+  mean: number;
+  variance: number;
+  stdDev: number;
+  first: number;
+  last: number;
+}
+
+export class ValueCalculator {
+  value: ValueData;
+
+  constructor() {
+    this.value = {
+      max: -Infinity,
+      min: Infinity,
+      average: 0,
+      sum: 0,
+      count: 0,
+      mean: 0,
+      variance: 0,
+      stdDev: 0,
+      first: 0,
+      last: 0,
+    };
+  }
+
+  addValue(value: number): void {
+    if (typeof value !== 'number' || isNaN(value)) {
+      throw new Error('Value must be a valid number');
+    }
+
+    this.value.sum += value;
+    this.value.count += 1;
+
+    if (value > this.value.max) {
+      this.value.max = value;
+    }
+    if (value < this.value.min) {
+      this.value.min = value;
+    }
+
+    // Calculate mean
+    this.value.mean = this.value.sum / this.value.count;
+
+    // Calculate variance
+    const diff = value - this.value.mean;
+    this.value.variance = ((this.value.variance * (this.value.count - 1)) + (diff * diff)) / this.value.count;
+
+    // Calculate standard deviation
+    this.value.stdDev = Math.sqrt(this.value.variance);
+
+    // Update average
+    this.value.average = this.value.sum / this.value.count;
+
+    this.value.first = this.value.first === undefined ? value : this.value.first;
+    this.value.last = value;
+  }
+
+  getValue(): ValueData {
+    return { ...this.value };
+  }
+}

@@ -1,7 +1,7 @@
 import { type FC, useEffect } from 'react'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 import type { CSSProperties } from '@mui/material'
-import type { Log } from '@/types/data'
+import type { Log, LogRecord } from '@/types/data'
 import { useMapPositions } from '@/hooks/useMapPositions'
 import { getColorBetweenTwoColors } from '@/utils'
 import { StartIcon } from '@/components/icons/StartIcon'
@@ -22,7 +22,13 @@ const styles: Record<string, CSSProperties> = {
   },
 }
 
-function lch(perc: number): { opacity: number; color: string } {
+function lch(record: LogRecord, log: Log): { opacity: number; color: string } {
+  if (record.$resample?.deviationSec! > 3) {
+    return { opacity: 0.2, color: '#000' }
+  }
+
+
+  const perc = record.flightTimeSec / log.durationSec
   const color = getColorBetweenTwoColors('#ff0000', '#00ff00', perc)
   return { opacity: 0.7, color }
 }

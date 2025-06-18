@@ -8,6 +8,7 @@ import VisuallyHiddenInput from '@/components/ui/VisuallyHiddenInput.tsx'
 import MapControls from '@/components/MapControls/MapControls.tsx'
 import Map from '@/components/Map/Map.tsx'
 import { parseRadiomasterLogs } from './utils/parse/parseRadiomasterLog'
+import { resampleData } from './utils/parse/resampler'
 
 const styles: Record<string, SxProps> = {
   app: {
@@ -48,7 +49,11 @@ function App() {
     if (!file) return
 
     const text = await file.text()
-    saveData(await parseRadiomasterLogs(text))
+    const raw = await parseRadiomasterLogs(text);
+    const resampled = resampleData(raw.data, 0.5);
+    raw.data = resampled;
+
+    saveData(raw)
   }
 
   const clearData = () => {

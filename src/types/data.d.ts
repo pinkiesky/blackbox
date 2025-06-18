@@ -1,3 +1,5 @@
+import type { ValueData } from "@/utils"
+
 export interface LocationData {
   lat: number
   lng: number
@@ -94,11 +96,26 @@ export interface Log {
   endTime: Date
   durationSec: number
   title: string
+
+  stats: {
+    altitude: ValueData;
+    groundSpeedKmh: ValueData;
+  }
 }
 
 export interface LogRecord {
   flightTimeSec: number
   coordinates: LocationData
-  altitude: number
+  altitudeM: number
   date: Date
+  groundSpeedKmh: number
+  headingDeg: number
+
+  $resample?: {
+    deviationSec?: number // deviation from the original record in seconds
+    interpolated?: boolean // whether this record was created by interpolation
+    originalFirstRecord?: LogRecord // the first record used for interpolation
+    originalSecondRecord?: LogRecord // the second record used for interpolation
+    time: number
+  }
 }
