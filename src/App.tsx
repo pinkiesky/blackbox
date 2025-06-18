@@ -38,7 +38,7 @@ function App() {
   // calculate value
   const isLoaded = useMemo(() => {
     return data !== null
-  }, [data]);
+  }, [data])
 
   useEffect(() => {
     setData(data)
@@ -49,9 +49,9 @@ function App() {
     if (!file) return
 
     const text = await file.text()
-    const raw = await parseRadiomasterLogs(text);
-    const resampled = resampleData(raw.data, 0.5);
-    raw.data = resampled;
+    const raw = await parseRadiomasterLogs(text)
+    const resampled = resampleData(raw.data, 0.5)
+    raw.data = resampled
 
     saveData(raw)
   }
