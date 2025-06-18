@@ -1,13 +1,34 @@
 import { type ChangeEvent, useEffect, useMemo } from 'react'
+import {
+  Chart,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Legend,
+} from 'chart.js'
+import DraggableSelectRangePlugin from 'chartjs-plugin-draggable-selectrange'
 import { Box, Button, type SxProps, Typography } from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { useLocalStorage } from '@uidotdev/usehooks'
 import type { Log } from '@/types/data'
 import { useDataStore } from '@/store/data.ts'
+import { parseRadiomasterLogs } from './utils/parse/parseRadiomasterLog'
 import VisuallyHiddenInput from '@/components/ui/VisuallyHiddenInput.tsx'
 import MapControls from '@/components/MapControls/MapControls.tsx'
 import Map from '@/components/Map/Map.tsx'
-import { parseRadiomasterLogs } from './utils/parse/parseRadiomasterLog'
+import LogChart from '@/components/LogChart/LogChart.tsx'
+
+Chart.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Legend,
+  DraggableSelectRangePlugin,
+)
 
 const styles: Record<string, SxProps> = {
   app: {
@@ -37,7 +58,7 @@ function App() {
   // calculate value
   const isLoaded = useMemo(() => {
     return data !== null
-  }, [data]);
+  }, [data])
 
   useEffect(() => {
     setData(data)
@@ -80,17 +101,21 @@ function App() {
       )}
 
       {isLoaded && (
-        <Box sx={styles.map}>
-          <Box sx={styles.mapInfo}>
-            <Typography sx={styles.mapTitle}>
-              {data?.title || 'Unknown Log'}
-            </Typography>
+        <>
+          <Box sx={styles.map}>
+            <Box sx={styles.mapInfo}>
+              <Typography sx={styles.mapTitle}>
+                {data?.title || 'Unknown Log'}
+              </Typography>
 
-            <MapControls clear={clearData} />
+              <MapControls clear={clearData} />
+            </Box>
+
+            <Map data={data!} />
           </Box>
 
-          <Map data={data!} />
-        </Box>
+          <LogChart />
+        </>
       )}
     </>
   )
