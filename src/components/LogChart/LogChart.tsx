@@ -1,26 +1,29 @@
 import { type FC, useEffect, useRef, useState } from 'react'
 import { Line } from 'react-chartjs-2'
 import { Box } from '@mui/material'
-import { getDraggableSelectRangeConfig } from '@/utils/chart'
 import { useDataStore } from '@/store/data.ts'
-import type { LocationData } from '@/types/data'
+import { getDraggableSelectRangeConfig } from '@/utils/chart'
+import { parseDate } from '@/utils/date'
 
 const LogChart: FC = () => {
   const { data } = useDataStore()
 
   const lineRef = useRef<any>(null)
-  const [verticalPositions, setVerticalPositions] = useState<number[]>([])
-  const [horizontalPositions, setHorizontalPositions] = useState<number[]>([])
+  const [altitude, setAltitude] = useState<number[]>([])
+  const [dates, setDates] = useState<string[]>([])
 
   useEffect(() => {
     if (!data) return
 
-    const positions: LocationData[] = data.data.map((log) => log.coordinates)
-    const vertical = positions.map((pos) => pos.lat)
-    const horizontal = positions.map((pos) => pos.lng)
+    const altitudeData = data.data.map((log) => log.altitude)
+    const dates = data.data.map((log) =>
+      parseDate(log.date, '', {
+        dateFormat: 'HH:mm:ss',
+      }),
+    )
 
-    setVerticalPositions(vertical)
-    setHorizontalPositions(horizontal)
+    setAltitude(altitudeData)
+    setDates(dates)
   }, [data])
 
   function getBackgroundColor() {
@@ -49,10 +52,10 @@ const LogChart: FC = () => {
           },
         }}
         data={{
-          labels: horizontalPositions,
+          labels: dates,
           datasets: [
             {
-              data: verticalPositions,
+              data: altitude,
               pointRadius: 0,
               pointHoverRadius: 0,
               borderColor: '#2388FF',

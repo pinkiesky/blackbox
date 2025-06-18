@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { resampleData, linearInterpolate, circularInterpolate } from './resampler'
+import {
+  resampleData,
+  linearInterpolate,
+  circularInterpolate,
+} from './resampler'
 import type { LogRecord } from '@/types/data'
 
 describe('linearInterpolate', () => {
@@ -46,14 +50,14 @@ describe('resampleData', () => {
     flightTimeSec: number,
     lat: number,
     lng: number,
-    altitudeM: number,
+    altitude: number,
     groundSpeedKmh: number,
     headingDeg: number,
-    baseDate: Date = new Date('2000-01-01T00:00:00.000Z')
+    baseDate: Date = new Date('2000-01-01T00:00:00.000Z'),
   ): LogRecord => ({
     flightTimeSec,
     coordinates: { lat, lng },
-    altitudeM,
+    altitude,
     date: new Date(baseDate.getTime() + flightTimeSec * 1000),
     groundSpeedKmh,
     headingDeg,
@@ -66,16 +70,16 @@ describe('resampleData', () => {
 
   it('should throw error if first record does not have flightTimeSec equal to 0', () => {
     const data = [createMockLogRecord(1, 41.0, 45.0, 100, 50, 180)]
-    
+
     expect(() => resampleData(data, 1)).toThrow(
-      'The first record must have flightTimeSec equal to 0.'
+      'The first record must have flightTimeSec equal to 0.',
     )
   })
 
   it('should return original data if it has only one record', () => {
     const data = [createMockLogRecord(0, 41.0, 45.0, 100, 50, 180)]
     const result = resampleData(data, 1)
-    
+
     expect(result).toHaveLength(1)
     expect(result[0]).toEqual(data[0])
   })
@@ -91,17 +95,17 @@ describe('resampleData', () => {
     const result = resampleData(data, 1)
 
     expect(result).toHaveLength(5)
-    
+
     // First record should be unchanged
     expect(result[0]).toEqual(data[0])
     // Last record should be unchanged
     expect(result[4]).toEqual(data[2])
-    
+
     // Check interpolated values at t=1
     expect(result[1].flightTimeSec).toBe(1)
     expect(result[1].coordinates.lat).toBe(41.5) // Linear interpolation between 41 and 42
     expect(result[1].coordinates.lng).toBe(45.5) // Linear interpolation between 45 and 46
-    expect(result[1].altitudeM).toBe(150) // Linear interpolation between 100 and 200
+    expect(result[1].altitude).toBe(150) // Linear interpolation between 100 and 200
     expect(result[1].groundSpeedKmh).toBe(55) // Linear interpolation between 50 and 60
     expect(result[1].headingDeg).toBe(185) // Linear interpolation between 180 and 190
     expect(result[1].date).toEqual(new Date('2000-01-01T00:00:01.000Z'))
@@ -113,7 +117,7 @@ describe('resampleData', () => {
     expect(result[3].flightTimeSec).toBe(3)
     expect(result[3].coordinates.lat).toBe(42.5)
     expect(result[3].coordinates.lng).toBe(46.5)
-    expect(result[3].altitudeM).toBe(250)
+    expect(result[3].altitude).toBe(250)
     expect(result[3].groundSpeedKmh).toBe(65)
     expect(result[3].headingDeg).toBe(195)
 
@@ -131,12 +135,12 @@ describe('resampleData', () => {
     const result = resampleData(data, 0.5)
 
     expect(result).toHaveLength(3) // 0, 0.5, 1.0 seconds
-    
+
     // Check interpolated values at t=0.5
     expect(result[1].flightTimeSec).toBe(0.5)
     expect(result[1].coordinates.lat).toBe(41.5)
     expect(result[1].coordinates.lng).toBe(45.5)
-    expect(result[1].altitudeM).toBe(150)
+    expect(result[1].altitude).toBe(150)
     expect(result[1].groundSpeedKmh).toBe(55)
     expect(result[1].headingDeg).toBe(185)
     expect(result[1].date).toEqual(new Date('2000-01-01T00:00:00.500Z'))
@@ -153,12 +157,12 @@ describe('resampleData', () => {
     const result = resampleData(data, 1)
 
     expect(result).toHaveLength(4) // 0, 1, 2, 3 seconds
-    
+
     // t=1 should interpolate between records at t=0.5 and t=3
     expect(result[1].flightTimeSec).toBe(1)
     expect(result[1].coordinates.lat).toBeCloseTo(41.6, 5)
     expect(result[1].coordinates.lng).toBeCloseTo(45.6, 5)
-    expect(result[1].altitudeM).toBeCloseTo(160, 5)
+    expect(result[1].altitude).toBeCloseTo(160, 5)
   })
 
   it('should stop resampling when reaching the end of data', () => {
@@ -175,10 +179,10 @@ describe('resampleData', () => {
     expect(result[10]).toEqual(data[1])
 
     expect(result[1].flightTimeSec).toBe(1)
-    expect(result[1].altitudeM).toBeCloseTo(110, 5) // Interpolated value
+    expect(result[1].altitude).toBeCloseTo(110, 5) // Interpolated value
 
     expect(result[9].flightTimeSec).toBe(9)
-    expect(result[9].altitudeM).toBeCloseTo(190, 5) // Interpolated value
+    expect(result[9].altitude).toBeCloseTo(190, 5) // Interpolated value
   })
 
   it('should handle large target frequency (larger than data duration)', () => {
@@ -197,20 +201,20 @@ describe('resampleData', () => {
   it('should preserve data types and structure', () => {
     const baseDate = new Date('2000-01-01T00:09:16.080Z')
     const data = [
-      createMockLogRecord(0, 41.863500, 45.279461, 0, 0.0, 0.00, baseDate),
+      createMockLogRecord(0, 41.8635, 45.279461, 0, 0.0, 0.0, baseDate),
       createMockLogRecord(1.36, 41.0, 0.279461, 3, 5.5, 15.5, baseDate),
     ]
 
     const result = resampleData(data, 0.5)
 
     expect(result).toHaveLength(3) // 0, 0.5, 1.0 seconds
-    
+
     // Check that all properties exist and have correct types
-    result.forEach(record => {
+    result.forEach((record) => {
       expect(typeof record.flightTimeSec).toBe('number')
       expect(typeof record.coordinates.lat).toBe('number')
       expect(typeof record.coordinates.lng).toBe('number')
-      expect(typeof record.altitudeM).toBe('number')
+      expect(typeof record.altitude).toBe('number')
       expect(record.date).toBeInstanceOf(Date)
       expect(typeof record.groundSpeedKmh).toBe('number')
       expect(typeof record.headingDeg).toBe('number')

@@ -1,4 +1,4 @@
-import type { ValueData } from "@/utils"
+import type { ValueData } from '@/utils'
 
 export interface LocationData {
   lat: number
@@ -98,15 +98,15 @@ export interface Log {
   title: string
 
   stats: {
-    altitude: ValueData;
-    groundSpeedKmh: ValueData;
+    altitude: ValueData
+    groundSpeedKmh: ValueData
   }
 }
 
 export interface LogRecord {
   flightTimeSec: number
   coordinates: LocationData
-  altitudeM: number
+  altitude: number
   date: Date
   groundSpeedKmh: number
   headingDeg: number
