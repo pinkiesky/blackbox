@@ -1,12 +1,12 @@
 import { type FC, useEffect } from 'react'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 import type { CSSProperties } from '@mui/material'
-import type { Log, LogRecord } from '@/types/data'
+import type { Log } from '@/types/data'
 import { useMapPositions } from '@/hooks/useMapPositions'
+import { getColorBetweenTwoColors } from '@/utils'
 import { StartIcon } from '@/components/icons/StartIcon'
 import { FinishIcon } from '@/components/icons/FinishIcon'
 import MapPolylines from '@/components/MapPolylines/MapPolylines.tsx'
-import { getColorBetweenTwoColors } from '@/utils'
 
 interface Props {
   data: Log
@@ -22,11 +22,7 @@ const styles: Record<string, CSSProperties> = {
   },
 }
 
-function lch(
-  record: LogRecord,
-  prevRecord: LogRecord | null,
-  perc: number,
-): { opacity: number; color: string } {
+function lch(perc: number): { opacity: number; color: string } {
   const color = getColorBetweenTwoColors('#ff0000', '#00ff00', perc)
   return { opacity: 0.7, color }
 }

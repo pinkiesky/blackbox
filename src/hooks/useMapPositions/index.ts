@@ -1,6 +1,6 @@
-import type { LocationData, Log, LogRecord, Segment } from '@/types/data'
-import { compareObjectsRecursively } from '@/utils'
 import { useMemo, useState } from 'react'
+import type { LocationData, Log, Segment } from '@/types/data'
+import { compareObjectsRecursively } from '@/utils'
 
 interface UseMapPositionsReturn {
   /* States */
@@ -17,17 +17,15 @@ interface UseMapPositionsReturn {
   initFinishPosition: () => void
 }
 
-export type LineConfigHandler = (
-  record: LogRecord,
-  prevRecord: LogRecord | null,
-  perc: number,
-  index: number,
-  log: Log,
-  segments: Segment[],
-  currentSegment: Segment | null,
-) => { opacity: number; color: string }
+export type LineConfigHandler = (perc: number) => {
+  opacity: number
+  color: string
+}
 
-export function useMapPositions(log: Log, lch: LineConfigHandler): UseMapPositionsReturn {
+export function useMapPositions(
+  log: Log,
+  lch: LineConfigHandler,
+): UseMapPositionsReturn {
   const [centerPosition, setCenterPosition] = useState<LocationData | null>(
     null,
   )
@@ -43,9 +41,9 @@ export function useMapPositions(log: Log, lch: LineConfigHandler): UseMapPositio
     let currentSegment: Segment | null = null
     for (let i = 0; i < log.data.length; i++) {
       const record = log.data[i]
-      const perc = record.flightTimeSec / log.durationSec;
+      const perc = record.flightTimeSec / log.durationSec
 
-      const recordConfig = lch(record, log.data[i - 1] ?? null, perc, i, log, segments, currentSegment)
+      const recordConfig = lch(perc)
 
       if (!currentSegment) {
         currentSegment = {
@@ -53,13 +51,13 @@ export function useMapPositions(log: Log, lch: LineConfigHandler): UseMapPositio
           config: recordConfig,
         }
 
-        continue;
+        continue
       }
 
       currentSegment.points.push(record.coordinates)
       if (!compareObjectsRecursively(currentSegment.config, recordConfig)) {
         segments.push(currentSegment)
-        i--;
+        i--
         currentSegment = null
       }
     }
@@ -69,7 +67,7 @@ export function useMapPositions(log: Log, lch: LineConfigHandler): UseMapPositio
     }
 
     return segments
-  }, [lch, log]);
+  }, [lch, log])
 
   const initCenterPosition = () => {
     if (log.data.length === 0) return
@@ -83,10 +81,11 @@ export function useMapPositions(log: Log, lch: LineConfigHandler): UseMapPositio
   const initPath = () => {
     if (log.data.length === 0) return
 
-    const newPath: LocationData[] = log.data
-      .map(({ coordinates }): LocationData => {
+    const newPath: LocationData[] = log.data.map(
+      ({ coordinates }): LocationData => {
         return { ...coordinates }
-      })
+      },
+    )
 
     setPath(newPath)
   }
