@@ -3,7 +3,15 @@ export interface LocationData {
   lng: number
 }
 
-export interface DataRecord {
+export interface Segment {
+  points: LatLngLiteral[]
+  config: {
+    opacity?: number
+    color?: string
+  }
+}
+
+export interface RadiomasterLogRecord {
   Date: string // YYYY-MM-DD
   Time: string // HH:mm:ss.SSS
   '1RSS(dB)': number
@@ -78,4 +86,19 @@ export interface DataRecord {
   'CH31(us)': number
   'CH32(us)': number
   'TxBat(V)': number
+}
+
+export interface Log {
+  data: LogRecord[]
+  startTime: Date
+  endTime: Date
+  durationSec: number
+  title: string
+}
+
+export interface LogRecord {
+  flightTimeSec: number
+  coordinates: LocationData
+  altitude: number
+  date: Date
 }

@@ -11,7 +11,6 @@ import {
 } from '@mui/material'
 import { FiltersType } from '@/types/filters.ts'
 import { useFiltersStore } from '@/store/filters'
-import FiltersAltitudeList from '@/components/FiltersAltitudeList/FiltersAltitudeList.tsx'
 
 interface Props {
   clear: () => void
@@ -22,7 +21,7 @@ const styles: SxProps = {
 }
 
 const MapControls: FC<Props> = ({ clear }) => {
-  const { currentFilter, setCurrentFilter } = useFiltersStore()
+  const { setCurrentFilter } = useFiltersStore()
 
   const onFilterChanged = (e: ChangeEvent<HTMLInputElement>) => {
     setCurrentFilter(Number(e.target.value) as unknown as FiltersType)
@@ -60,7 +59,6 @@ const MapControls: FC<Props> = ({ clear }) => {
         </RadioGroup>
       </FormControl>
 
-      {currentFilter === FiltersType.ALTITUDE && <FiltersAltitudeList />}
     </Box>
   )
 }

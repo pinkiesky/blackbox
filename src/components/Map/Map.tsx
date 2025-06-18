@@ -1,14 +1,15 @@
 import { type FC, useEffect } from 'react'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 import type { CSSProperties } from '@mui/material'
-import type { DataRecord } from '@/types/data'
+import type { Log } from '@/types/data'
 import { useMapPositions } from '@/hooks/useMapPositions'
+import { getColorBetweenTwoColors } from '@/utils'
 import { StartIcon } from '@/components/icons/StartIcon'
 import { FinishIcon } from '@/components/icons/FinishIcon'
 import MapPolylines from '@/components/MapPolylines/MapPolylines.tsx'
 
 interface Props {
-  data: DataRecord[]
+  data: Log
 }
 
 const styles: Record<string, CSSProperties> = {
@@ -21,6 +22,11 @@ const styles: Record<string, CSSProperties> = {
   },
 }
 
+function lch(perc: number): { opacity: number; color: string } {
+  const color = getColorBetweenTwoColors('#ff0000', '#00ff00', perc)
+  return { opacity: 0.7, color }
+}
+
 const Map: FC<Props> = ({ data }) => {
   const {
     startPosition,
@@ -31,7 +37,7 @@ const Map: FC<Props> = ({ data }) => {
     initPath,
     initStartPosition,
     initFinishPosition,
-  } = useMapPositions(data)
+  } = useMapPositions(data, lch)
 
   useEffect(() => {
     initCenterPosition()

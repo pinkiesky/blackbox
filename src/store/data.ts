@@ -1,12 +1,12 @@
 import { create } from 'zustand'
-import type { DataRecord } from '@/types/data'
+import type { Log } from '@/types/data'
 
 interface DataState {
-  data: DataRecord[]
-  setData: (newData: DataRecord[]) => void
+  data: Log | null
+  setData: (newData: Log | null) => void
 }
 
 export const useDataStore = create<DataState>((set) => ({
-  data: [],
-  setData: (newData: DataRecord[]) => set({ data: newData }),
+  data: null,
+  setData: (newData: Log | null) => set({ data: newData }),
 }))

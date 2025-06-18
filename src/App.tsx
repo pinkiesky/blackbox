@@ -1,14 +1,13 @@
-import { type ChangeEvent, useEffect } from 'react'
+import { type ChangeEvent, useEffect, useMemo } from 'react'
 import { Box, Button, type SxProps, Typography } from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { useLocalStorage } from '@uidotdev/usehooks'
-import type { DataRecord } from '@/types/data'
-import { parseCsv } from '@/utils/parse'
-import { parseDate } from '@/utils/date'
+import type { Log } from '@/types/data'
 import { useDataStore } from '@/store/data.ts'
 import VisuallyHiddenInput from '@/components/ui/VisuallyHiddenInput.tsx'
 import MapControls from '@/components/MapControls/MapControls.tsx'
 import Map from '@/components/Map/Map.tsx'
+import { parseRadiomasterLogs } from './utils/parse/parseRadiomasterLog'
 
 const styles: Record<string, SxProps> = {
   app: {
@@ -32,8 +31,13 @@ const styles: Record<string, SxProps> = {
 }
 
 function App() {
-  const [data, saveData] = useLocalStorage<DataRecord[]>('cvs-data', [])
+  const [data, saveData] = useLocalStorage<Log | null>('Log', null)
   const { setData } = useDataStore()
+
+  // calculate value
+  const isLoaded = useMemo(() => {
+    return data !== null
+  }, [data]);
 
   useEffect(() => {
     setData(data)
@@ -44,16 +48,16 @@ function App() {
     if (!file) return
 
     const text = await file.text()
-    saveData(await parseCsv(text))
+    saveData(await parseRadiomasterLogs(text))
   }
 
   const clearData = () => {
-    saveData([])
+    saveData(null)
   }
 
   return (
     <>
-      {data.length === 0 && (
+      {!isLoaded && (
         <Box sx={styles.app}>
           <h1>Blackbox</h1>
 
@@ -75,17 +79,17 @@ function App() {
         </Box>
       )}
 
-      {data.length > 0 && (
+      {isLoaded && (
         <Box sx={styles.map}>
           <Box sx={styles.mapInfo}>
             <Typography sx={styles.mapTitle}>
-              Blackbox {parseDate(data[0].Date)}
+              {data?.title || 'Unknown Log'}
             </Typography>
 
             <MapControls clear={clearData} />
           </Box>
 
-          <Map data={data} />
+          <Map data={data!} />
         </Box>
       )}
     </>
