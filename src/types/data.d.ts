@@ -111,7 +111,7 @@ export interface LogRecord {
   groundSpeedKmh: number
   headingDeg: number
 
-  $resample: {
+  $resample?: {
     deviationSec?: number // deviation from the original record in seconds
     interpolated?: boolean // whether this record was created by interpolation
     originalFirstRecord?: LogRecord // the first record used for interpolation
