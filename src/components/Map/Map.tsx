@@ -22,14 +22,20 @@ const styles: Record<string, CSSProperties> = {
   },
 }
 
-function lch(record: LogRecord, log: Log): { opacity: number; color: string } {
-  if (record.$resample?.deviationSec! > 3) {
+function lch(record: LogRecord): { opacity: number; color: string } {
+  if (
+    record.$resample &&
+    record.$resample.deviationSec &&
+    record.$resample.deviationSec > 3
+  ) {
     return { opacity: 0.2, color: '#000' }
   }
 
-
-  const perc = record.flightTimeSec / log.durationSec
-  const color = getColorBetweenTwoColors('#ff0000', '#00ff00', perc)
+  const color = getColorBetweenTwoColors(
+    '#ff0000',
+    '#00ff00',
+    record.amperageCurrentA / 20,
+  )
   return { opacity: 0.7, color }
 }
 

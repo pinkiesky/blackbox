@@ -21,7 +21,7 @@ const MapPolylines: FC<Props> = ({ segments }) => {
         <Polyline
           key={index}
           positions={segment.points}
-          pathOptions={{ 
+          pathOptions={{
             ...pathOptions,
             opacity: segment.config.opacity ?? pathOptions.opacity,
             color: segment.config.color ?? pathOptions.color,

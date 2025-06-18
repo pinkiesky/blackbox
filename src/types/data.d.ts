@@ -1,4 +1,4 @@
-import type { ValueData } from "@/utils"
+import type { ValueData } from '@/utils'
 
 export interface LocationData {
   lat: number
@@ -91,16 +91,16 @@ export interface RadiomasterLogRecord {
 }
 
 export interface Log {
-  data: LogRecord[]
+  records: LogRecord[]
   startTime: Date
   endTime: Date
   durationSec: number
   title: string
+}
 
-  stats: {
-    altitude: ValueData;
-    groundSpeedKmh: ValueData;
-  }
+export interface LogStats {
+  altitude: ValueData
+  groundSpeedKmh: ValueData
 }
 
 export interface LogRecord {
@@ -110,6 +110,13 @@ export interface LogRecord {
   date: Date
   groundSpeedKmh: number
   headingDeg: number
+  transmitterLinkQuality: number
+  transmitterPowerMw: number // in milliwatts
+  amperageCurrentA: number
+  verticalSpeedMps: number
+  rollRad: number
+  pitchRad: number
+  yawRad: number
 
   $resample?: {
     deviationSec?: number // deviation from the original record in seconds

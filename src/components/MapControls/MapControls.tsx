@@ -58,7 +58,6 @@ const MapControls: FC<Props> = ({ clear }) => {
           />
         </RadioGroup>
       </FormControl>
-
     </Box>
   )
 }

@@ -9,6 +9,7 @@ import MapControls from '@/components/MapControls/MapControls.tsx'
 import Map from '@/components/Map/Map.tsx'
 import { parseRadiomasterLogs } from './utils/parse/parseRadiomasterLog'
 import { resampleData } from './utils/parse/resampler'
+import { DistanceCalculator, ValueCalculator } from './utils'
 
 const styles: Record<string, SxProps> = {
   app: {
@@ -50,8 +51,49 @@ function App() {
 
     const text = await file.text()
     const raw = await parseRadiomasterLogs(text)
-    const resampled = resampleData(raw.data, 0.5)
-    raw.data = resampled
+    const resampled = resampleData(raw.records, 0.5)
+    raw.records = resampled
+
+    const altitudeCalculator = new ValueCalculator()
+    const speedCalculator = new ValueCalculator()
+    const transmitterPowerCalculator = new ValueCalculator()
+    const transmitterQualityCalculator = new ValueCalculator()
+    const distanceCalculator = new DistanceCalculator()
+    for (let i = 0; i < raw.records.length; i++) {
+      const record = raw.records[i]
+      const prevRecord = raw.records[i - 1] || null
+      const weight = prevRecord
+        ? record.flightTimeSec - prevRecord.flightTimeSec
+        : 1
+
+      altitudeCalculator.addValueWeighted(record.altitudeM, weight)
+      speedCalculator.addValueWeighted(record.groundSpeedKmh, weight)
+      transmitterPowerCalculator.addValueWeighted(
+        record.transmitterPowerMw,
+        weight,
+      )
+      transmitterQualityCalculator.addValueWeighted(
+        record.transmitterLinkQuality,
+        weight,
+      )
+      distanceCalculator.addPoint(record.coordinates, record.altitudeM)
+    }
+
+    console.log('Altitude stats:', altitudeCalculator.getValue())
+    console.log('Speed stats:', speedCalculator.getValue())
+    console.log(
+      'Transmitter Power stats:',
+      transmitterPowerCalculator.getValue(),
+    )
+    console.log(
+      'Transmitter Quality stats:',
+      transmitterQualityCalculator.getValue(),
+    )
+    console.log(
+      'Total distance:',
+      distanceCalculator.getDistance().totalDistanceM,
+      'm',
+    )
 
     saveData(raw)
   }

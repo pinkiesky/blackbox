@@ -17,17 +17,17 @@ describe('parseRadiomasterLogs', () => {
     const result = await parseRadiomasterLogs(validCsvText)
 
     expect(result).toBeDefined()
-    expect(result.data.length).toBe(4)
+    expect(result.records.length).toBe(4)
     expect(result.startTime).toEqual(new Date('2000-01-01T00:09:16.080Z'))
     expect(result.endTime).toEqual(new Date('2000-01-01T00:09:17.440Z'))
     expect(result.durationSec).toBeCloseTo(1.36, 2)
 
-    const firstRecord = result.data[0]
+    const firstRecord = result.records[0]
     expect(firstRecord.flightTimeSec).toBeCloseTo(0, 2)
-    expect(firstRecord.coordinates).toEqual({ lat: 41.863500, lng: 45.279461 })
+    expect(firstRecord.coordinates).toEqual({ lat: 41.8635, lng: 45.279461 })
     expect(firstRecord.altitudeM).toBe(0)
 
-    const lastRecord = result.data[3]
+    const lastRecord = result.records[3]
     expect(lastRecord.flightTimeSec).toBeCloseTo(1.36, 2)
     expect(lastRecord.coordinates).toEqual({ lat: 41, lng: 0.279461 })
     expect(lastRecord.altitudeM).toBe(3)
