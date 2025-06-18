@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import type { LocationData, Log, Segment } from '@/types/data'
+import type { LocationData, Log, LogRecord, Segment } from '@/types/data'
 import { compareObjectsRecursively } from '@/utils'
 
 interface UseMapPositionsReturn {
@@ -17,7 +17,7 @@ interface UseMapPositionsReturn {
   initFinishPosition: () => void
 }
 
-export type LineConfigHandler = (perc: number) => {
+export type LineConfigHandler = (record: LogRecord, log: Log) => {
   opacity: number
   color: string
 }
@@ -41,9 +41,8 @@ export function useMapPositions(
     let currentSegment: Segment | null = null
     for (let i = 0; i < log.data.length; i++) {
       const record = log.data[i]
-      const perc = record.flightTimeSec / log.durationSec
 
-      const recordConfig = lch(perc)
+      const recordConfig = lch(record, log)
 
       if (!currentSegment) {
         currentSegment = {
