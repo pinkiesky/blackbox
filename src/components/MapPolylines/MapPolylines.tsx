@@ -10,7 +10,7 @@ interface Props {
 const MapPolylines: FC<Props> = ({ segments }) => {
   const pathOptions: PathOptions = {
     color: '#00f',
-    weight: 6,
+    weight: 3,
     opacity: 1,
     stroke: true,
   }
