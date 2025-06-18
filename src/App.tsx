@@ -50,7 +50,7 @@ function App() {
 
     const text = await file.text()
     const raw = await parseRadiomasterLogs(text);
-    const resampled = resampleData(raw.data, 1);
+    const resampled = resampleData(raw.data, 0.5);
     raw.data = resampled;
 
     saveData(raw)

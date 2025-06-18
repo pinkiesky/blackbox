@@ -110,4 +110,12 @@ export interface LogRecord {
   date: Date
   groundSpeedKmh: number
   headingDeg: number
+
+  $resample: {
+    deviationSec?: number // deviation from the original record in seconds
+    interpolated?: boolean // whether this record was created by interpolation
+    originalFirstRecord?: LogRecord // the first record used for interpolation
+    originalSecondRecord?: LogRecord // the second record used for interpolation
+    time: number
+  }
 }

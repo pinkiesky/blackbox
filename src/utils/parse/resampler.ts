@@ -49,7 +49,16 @@ export function resampleData(
 
   const totalDuration = data[data.length - 1].flightTimeSec;
   const resampled: LogRecord[] = [];
-  resampled.push({ ...data[0] });
+  resampled.push({
+    ...data[0],
+    $resample: {
+      deviationSec: 0,
+      interpolated: false,
+      originalFirstRecord: data[0],
+      originalSecondRecord: data[0],
+      time: 0,
+    }
+  });
 
   for (let time = targetFrequencySec; time <= totalDuration; time += targetFrequencySec) {
     const secondRecordIndex = data.findIndex(record => record.flightTimeSec >= time);
@@ -65,6 +74,11 @@ export function resampleData(
     const secondRecord = data[secondRecordIndex];
     const firstRecord = data[firstRecordIndex];
 
+    const minDeviationSec = Math.min(
+      Math.abs(time - firstRecord.flightTimeSec),
+      Math.abs(secondRecord.flightTimeSec - time),
+    );
+
     const fraction = (time - firstRecord.flightTimeSec) / (secondRecord.flightTimeSec - firstRecord.flightTimeSec);
     const interpolatedRecord: LogRecord = {
       flightTimeSec: time,
@@ -76,6 +90,13 @@ export function resampleData(
       date: new Date(data[0].date.getTime() + (time * 1000)),
       groundSpeedKmh: linearInterpolate(firstRecord.groundSpeedKmh, secondRecord.groundSpeedKmh, fraction),
       headingDeg: circularInterpolate(firstRecord.headingDeg, secondRecord.headingDeg, fraction),
+      $resample: {
+        deviationSec: minDeviationSec,
+        interpolated: true,
+        originalFirstRecord: firstRecord,
+        originalSecondRecord: secondRecord,
+        time,
+      }
     };
 
     resampled.push(interpolatedRecord);
