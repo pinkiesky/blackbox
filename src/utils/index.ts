@@ -259,4 +259,10 @@ export class DerivativeCalculator {
       minDerivative: this.getMinDerivative(),
     }
   }
+
+  reset(): void {
+    this.prevValue = null
+    this.derivatives = []
+    this.totalDerivative = 0
+  }
 }

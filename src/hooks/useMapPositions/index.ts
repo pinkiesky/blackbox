@@ -25,7 +25,6 @@ interface UseMapPositionsReturn {
 
 export type LineConfigHandler = (
   record: LogRecord,
-  log: Log,
   stat: LogStatistics,
 ) => Segment['config']
 
@@ -50,7 +49,7 @@ export function useMapPositions(
     for (let i = 0; i < log.records.length; i++) {
       const record = log.records[i]
 
-      const recordConfig = lch(record, log, stat)
+      const recordConfig = lch(record, stat)
 
       if (!currentSegment) {
         currentSegment = {

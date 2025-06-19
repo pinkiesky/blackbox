@@ -94,11 +94,7 @@ const styles: Record<string, CSSProperties> = {
   },
 }
 
-function lch(
-  record: LogRecord,
-  log: Log,
-  stat: LogStatistics,
-): Segment['config'] {
+function lch(record: LogRecord, stat: LogStatistics): Segment['config'] {
   if (
     record.$resample &&
     record.$resample.deviationSec &&
