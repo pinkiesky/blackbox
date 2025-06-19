@@ -126,3 +126,11 @@ export interface LogRecord {
     time: number
   }
 }
+
+export interface LogStatistics {
+  altitude: ValueData
+  groundSpeedKmh: ValueData
+  transmitterPowerMw: ValueData
+  transmitterLinkQuality: ValueData
+  totalDistanceM: number
+}

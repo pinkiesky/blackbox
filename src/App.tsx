@@ -1,9 +1,8 @@
-import { type ChangeEvent, useEffect, useMemo } from 'react'
+import { type ChangeEvent, useEffect, useMemo, useState } from 'react'
 import { Box, Button, type SxProps, Typography } from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { useLocalStorage } from '@uidotdev/usehooks'
-import type { Log } from '@/types/data'
-import { useDataStore } from '@/store/data.ts'
+import type { Log, LogStatistics } from '@/types/data'
 import VisuallyHiddenInput from '@/components/ui/VisuallyHiddenInput.tsx'
 import MapControls from '@/components/MapControls/MapControls.tsx'
 import Map from '@/components/Map/Map.tsx'
@@ -37,24 +36,50 @@ const styles: Record<string, SxProps> = {
 }
 
 function App() {
-  const [data, saveData] = useLocalStorage<Log | null>('Log', null)
-  const { setData } = useDataStore()
-
-  // calculate value
-  const isLoaded = useMemo(() => {
-    return data !== null
-  }, [data])
+  const [data, saveData] = useLocalStorage<string | null>('RawData2', null)
+  const [rawLog, setRawLog] = useState<Log | null>(null)
 
   useEffect(() => {
-    setData(data)
-  }, [])
+    if (!data) {
+      setRawLog(null)
+      return
+    }
+    let ignore = false
 
-  const onUploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+    parseRawData(data)
+      .catch((error) => {
+        alert('Error parsing log: ' + error.message)
+        console.error('Error parsing log:', error)
+        return null
+      })
+      .then((parsed) => {
+        if (ignore) return
+        setRawLog(parsed)
+      })
 
-    const text = await file.text()
-    const raw = await parseRadiomasterLogs(text)
+    return () => {
+      ignore = true
+    }
+  }, [data])
+
+  const log = useMemo(() => {
+    if (!rawLog) {
+      return null
+    }
+
+    const logData: Log = {
+      ...rawLog,
+    }
+    logData.records = resampleData(rawLog.records, 0.5)
+
+    return logData
+  }, [rawLog])
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const globalLogStatistic = useMemo<LogStatistics | null>(() => {
+    if (!rawLog) {
+      return null
+    }
 
     const altitudeCalculator = new ValueCalculator()
     const speedCalculator = new ValueCalculator()
@@ -63,9 +88,9 @@ function App() {
     const distanceCalculator = new DistanceCalculator()
     const rollDerivativeCalculator = new DerivativeCalculator()
 
-    for (let i = 0; i < raw.records.length; i++) {
-      const record = raw.records[i]
-      const prevRecord = raw.records[i - 1] || null
+    for (let i = 0; i < rawLog.records.length; i++) {
+      const record = rawLog.records[i]
+      const prevRecord = rawLog.records[i - 1] || null
       const weight = prevRecord
         ? record.flightTimeSec - prevRecord.flightTimeSec
         : 1
@@ -82,15 +107,6 @@ function App() {
       )
       distanceCalculator.addPoint(record.coordinates, record.altitudeM)
       rollDerivativeCalculator.addValue(record.rollRad, weight)
-    }
-
-    const d = rollDerivativeCalculator.getDerivativeData().derivatives
-    for (let i = 0; i < raw.records.length; i++) {
-      const roll = raw.records[i].rollRad
-      const di = d[i]
-      console.log(
-        `Roll: ${roll}, Derivative: ${di}, Time: ${raw.records[i].flightTimeSec}`,
-      )
     }
 
     console.log('Altitude stats:', altitudeCalculator.getValue())
@@ -113,9 +129,33 @@ function App() {
       rollDerivativeCalculator.getDerivativeData(),
     )
 
-    const resampled = resampleData(raw.records, 0.5)
-    raw.records = resampled
-    saveData(raw)
+    const stats: LogStatistics = {
+      altitude: altitudeCalculator.getValue(),
+      groundSpeedKmh: speedCalculator.getValue(),
+      transmitterPowerMw: transmitterPowerCalculator.getValue(),
+      transmitterLinkQuality: transmitterQualityCalculator.getValue(),
+      totalDistanceM: distanceCalculator.getDistance().totalDistanceM,
+    }
+
+    return stats
+  }, [rawLog])
+
+  const parseRawData = async (rawData: string): Promise<Log> => {
+    console.log('Parsing raw data...', rawData.length, 'characters')
+    const log = await parseRadiomasterLogs(rawData)
+
+    const resampled = resampleData(log.records, 0.5)
+    log.records = resampled
+
+    return log
+  }
+
+  const onUploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const text = await file.text()
+    saveData(text)
   }
 
   const clearData = () => {
@@ -124,7 +164,7 @@ function App() {
 
   return (
     <>
-      {!isLoaded && (
+      {!log && (
         <Box sx={styles.app}>
           <h1>Blackbox</h1>
 
@@ -146,17 +186,17 @@ function App() {
         </Box>
       )}
 
-      {isLoaded && (
+      {log && (
         <Box sx={styles.map}>
           <Box sx={styles.mapInfo}>
             <Typography sx={styles.mapTitle}>
-              {data?.title || 'Unknown Log'}
+              {log.title || 'Unknown Log'}
             </Typography>
 
             <MapControls clear={clearData} />
           </Box>
 
-          <Map data={data!} />
+          <Map data={log!} />
         </Box>
       )}
     </>
