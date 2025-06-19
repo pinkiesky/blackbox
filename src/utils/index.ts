@@ -76,6 +76,7 @@ export interface ValueData {
   average: number
   q95: number // 95th percentile
   q99: number // 99th percentile
+  uniqueValues: number[] // Optional, only if you need to track unique values
 }
 
 export class ValueCalculator {
@@ -83,6 +84,7 @@ export class ValueCalculator {
   private totalWeight: number = 0
   private totalWeightedSum: number = 0
   private allValues: number[] = []
+  private uniqueValuesSet: Set<number> = new Set()
 
   constructor() {
     this.value = {
@@ -91,6 +93,7 @@ export class ValueCalculator {
       average: 0,
       q95: NaN,
       q99: NaN,
+      uniqueValues: [],
     }
   }
 
@@ -111,6 +114,7 @@ export class ValueCalculator {
     this.value.average = this.totalWeightedSum / this.totalWeight
 
     this.allValues.push(value)
+    this.uniqueValuesSet.add(value)
   }
 
   calculatePercentiles(): { q95: number; q99: number } {
@@ -143,6 +147,7 @@ export class ValueCalculator {
     return {
       ...this.value,
       ...this.calculatePercentiles(),
+      uniqueValues: Array.from(this.uniqueValuesSet).sort((a, b) => a - b),
     }
   }
 }

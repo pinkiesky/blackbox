@@ -1,5 +1,11 @@
 import { useMemo, useState } from 'react'
-import type { LocationData, Log, LogRecord, Segment } from '@/types/data'
+import type {
+  LocationData,
+  Log,
+  LogRecord,
+  LogStatistics,
+  Segment,
+} from '@/types/data'
 import { compareObjectsRecursively } from '@/utils'
 
 interface UseMapPositionsReturn {
@@ -20,13 +26,12 @@ interface UseMapPositionsReturn {
 export type LineConfigHandler = (
   record: LogRecord,
   log: Log,
-) => {
-  opacity: number
-  color: string
-}
+  stat: LogStatistics,
+) => Segment['config']
 
 export function useMapPositions(
   log: Log,
+  stat: LogStatistics,
   lch: LineConfigHandler,
 ): UseMapPositionsReturn {
   const [centerPosition, setCenterPosition] = useState<LocationData | null>(
@@ -45,7 +50,7 @@ export function useMapPositions(
     for (let i = 0; i < log.records.length; i++) {
       const record = log.records[i]
 
-      const recordConfig = lch(record, log)
+      const recordConfig = lch(record, log, stat)
 
       if (!currentSegment) {
         currentSegment = {
@@ -73,11 +78,10 @@ export function useMapPositions(
 
   const initCenterPosition = () => {
     if (log.records.length === 0) return
-
-    const arrayCenterIndex = Math.floor(log.records.length / 2)
-    const gps = log.records[arrayCenterIndex].coordinates
-
-    setCenterPosition(gps)
+    setCenterPosition({
+      lat: log.records[0].coordinates.lat,
+      lng: log.records[0].coordinates.lng,
+    })
   }
 
   const initPath = () => {

@@ -10,7 +10,13 @@ export interface Segment {
   config: {
     opacity?: number
     color?: string
+    popoverText?: string // text to show in the popover
   }
+}
+
+export interface Arrow {
+  position: LatLngLiteral
+  bearingDeg: number // in degrees
 }
 
 export interface RadiomasterLogRecord {

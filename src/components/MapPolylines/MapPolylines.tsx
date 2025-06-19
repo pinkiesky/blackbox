@@ -1,6 +1,6 @@
 import { type FC } from 'react'
 import { type PathOptions } from 'leaflet'
-import { Polyline } from 'react-leaflet'
+import { Polyline, Popup } from 'react-leaflet'
 import type { Segment } from '@/types/data'
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
 const MapPolylines: FC<Props> = ({ segments }) => {
   const pathOptions: PathOptions = {
     color: '#00f',
-    weight: 3,
+    weight: 4,
     opacity: 1,
     stroke: true,
   }
@@ -26,7 +26,13 @@ const MapPolylines: FC<Props> = ({ segments }) => {
             opacity: segment.config.opacity ?? pathOptions.opacity,
             color: segment.config.color ?? pathOptions.color,
           }}
-        />
+        >
+          {segment.config.popoverText && (
+            <Popup>
+              <div>{segment.config.popoverText}</div>
+            </Popup>
+          )}
+        </Polyline>
       ))}
     </>
   )

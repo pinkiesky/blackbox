@@ -144,9 +144,6 @@ function App() {
     console.log('Parsing raw data...', rawData.length, 'characters')
     const log = await parseRadiomasterLogs(rawData)
 
-    const resampled = resampleData(log.records, 0.5)
-    log.records = resampled
-
     return log
   }
 
@@ -186,7 +183,7 @@ function App() {
         </Box>
       )}
 
-      {log && (
+      {log && globalLogStatistic && (
         <Box sx={styles.map}>
           <Box sx={styles.mapInfo}>
             <Typography sx={styles.mapTitle}>
@@ -196,7 +193,7 @@ function App() {
             <MapControls clear={clearData} />
           </Box>
 
-          <Map data={log!} />
+          <Map data={log!} stat={globalLogStatistic!} />
         </Box>
       )}
     </>
