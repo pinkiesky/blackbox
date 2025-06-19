@@ -212,10 +212,6 @@ export class DerivativeCalculator {
       const derivative = deltaValue / timeDelta
       this.derivatives.push(derivative)
       this.totalDerivative += derivative
-
-      console.log(
-        `Derivative = (${value} - ${this.prevValue}) / ${timeDelta} = ${derivative}`,
-      )
     }
 
     this.prevValue = value
