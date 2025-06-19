@@ -74,18 +74,23 @@ export interface ValueData {
   max: number
   min: number
   average: number
+  q95: number // 95th percentile
+  q99: number // 99th percentile
 }
 
 export class ValueCalculator {
   private value: ValueData
   private totalWeight: number = 0
   private totalWeightedSum: number = 0
+  private allValues: number[] = []
 
   constructor() {
     this.value = {
       max: -Infinity,
       min: Infinity,
       average: 0,
+      q95: NaN,
+      q99: NaN,
     }
   }
 
@@ -104,11 +109,40 @@ export class ValueCalculator {
     this.totalWeightedSum += value * weight
     this.totalWeight += weight
     this.value.average = this.totalWeightedSum / this.totalWeight
+
+    this.allValues.push(value)
+  }
+
+  calculatePercentiles(): { q95: number; q99: number } {
+    if (this.allValues.length === 0) {
+      return { q95: 0, q99: 0 }
+    }
+
+    const sortedValues = [...this.allValues].sort((a, b) => a - b)
+    const n = sortedValues.length
+    if (n === 0) {
+      return {
+        ...this.value,
+        q95: 0,
+        q99: 0,
+      }
+    }
+
+    const q95Index = Math.floor(n * 0.95)
+    const q99Index = Math.floor(n * 0.99)
+    const q95 = sortedValues[q95Index]
+    const q99 = sortedValues[q99Index]
+
+    return {
+      q95,
+      q99,
+    }
   }
 
   getValue(): ValueData {
     return {
       ...this.value,
+      ...this.calculatePercentiles(),
     }
   }
 }
@@ -142,6 +176,86 @@ export class DistanceCalculator {
   getDistance(): DistanceData {
     return {
       totalDistanceM: this.totalDistanceM,
+    }
+  }
+}
+
+export interface DerivativeData {
+  derivative: number // Current derivative value
+  averageDerivative: number // Average derivative over all samples
+  maxDerivative: number // Maximum derivative encountered
+  minDerivative: number // Minimum derivative encountered
+  derivatives: number[] // All calculated derivatives
+}
+
+export class DerivativeCalculator {
+  private prevValue: number | null = null
+  private derivatives: number[] = []
+  private totalDerivative: number = 0
+
+  addValue(value: number, timeDelta: number): void {
+    if (typeof value !== 'number' || isNaN(value)) {
+      throw new Error('Value must be a valid number')
+    }
+    if (typeof timeDelta !== 'number' || isNaN(timeDelta)) {
+      throw new Error('Time must be a valid number')
+    }
+    if (timeDelta === 0) {
+      throw new Error(
+        'Time delta cannot be zero - would result in infinite derivative',
+      )
+    }
+
+    if (this.prevValue !== null) {
+      const deltaValue = value - this.prevValue
+
+      const derivative = deltaValue / timeDelta
+      this.derivatives.push(derivative)
+      this.totalDerivative += derivative
+
+      console.log(
+        `Derivative = (${value} - ${this.prevValue}) / ${timeDelta} = ${derivative}`,
+      )
+    }
+
+    this.prevValue = value
+  }
+
+  getCurrentDerivative(): number {
+    if (this.derivatives.length === 0) {
+      return 0
+    }
+    return this.derivatives[this.derivatives.length - 1]
+  }
+
+  getAverageDerivative(): number {
+    if (this.derivatives.length === 0) {
+      return 0
+    }
+    return this.totalDerivative / this.derivatives.length
+  }
+
+  getMaxDerivative(): number {
+    if (this.derivatives.length === 0) {
+      return 0
+    }
+    return Math.max(...this.derivatives)
+  }
+
+  getMinDerivative(): number {
+    if (this.derivatives.length === 0) {
+      return 0
+    }
+    return Math.min(...this.derivatives)
+  }
+
+  getDerivativeData(): DerivativeData {
+    return {
+      derivatives: this.derivatives,
+      derivative: this.getCurrentDerivative(),
+      averageDerivative: this.getAverageDerivative(),
+      maxDerivative: this.getMaxDerivative(),
+      minDerivative: this.getMinDerivative(),
     }
   }
 }
