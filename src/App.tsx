@@ -24,6 +24,7 @@ import {
   ValueCalculator,
 } from './utils'
 import LogChart from '@/components/LogChart/LogChart.tsx'
+import { useDataStore } from '@/store/data.ts'
 
 Chart.register(
   DraggableSelectRangePlugin,
@@ -43,6 +44,7 @@ const styles: Record<string, SxProps> = {
     display: 'flex',
     gap: '24px',
     maxWidth: '1280px',
+    paddingTop: '2rem',
     margin: '0 auto',
     textAlign: 'center',
   },
@@ -61,6 +63,8 @@ const styles: Record<string, SxProps> = {
 
 function App() {
   const [data, saveData] = useLocalStorage<string | null>('RawData2', null)
+  const { setData } = useDataStore()
+
   const [rawLog, setRawLog] = useState<Log | null>(null)
 
   useEffect(() => {
@@ -95,6 +99,7 @@ function App() {
       ...rawLog,
     }
     logData.records = resampleData(rawLog.records, 0.5)
+    setData(logData)
 
     return logData
   }, [rawLog])
@@ -165,9 +170,7 @@ function App() {
 
   const parseRawData = async (rawData: string): Promise<Log> => {
     console.log('Parsing raw data...', rawData.length, 'characters')
-    const log = await parseRadiomasterLogs(rawData)
-
-    return log
+    return await parseRadiomasterLogs(rawData)
   }
 
   const onUploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -219,6 +222,7 @@ function App() {
 
             <Map data={log!} stat={globalLogStatistic!} />
           </Box>
+
           <Box sx={styles.chart}>
             <LogChart />
           </Box>

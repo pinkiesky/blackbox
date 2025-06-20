@@ -1,9 +1,9 @@
 import { type FC, useEffect, useRef, useState } from 'react'
+import { format } from 'date-fns'
 import { Line } from 'react-chartjs-2'
 import { Box } from '@mui/material'
 import { useDataStore } from '@/store/data.ts'
 import { getDraggableSelectRangeConfig } from '@/utils/chart'
-import { parseDate } from '@/utils/date'
 
 const LogChart: FC = () => {
   const { data } = useDataStore()
@@ -15,12 +15,8 @@ const LogChart: FC = () => {
   useEffect(() => {
     if (!data) return
 
-    const altitudeData = data.data.map((log) => log.altitude)
-    const dates = data.data.map((log) =>
-      parseDate(log.date, '', {
-        dateFormat: 'HH:mm:ss',
-      }),
-    )
+    const altitudeData = data.records.map((log) => log.altitude)
+    const dates = data.records.map((log) => format(log.date, 'HH:mm:ss'))
 
     setAltitude(altitudeData)
     setDates(dates)
@@ -44,11 +40,15 @@ const LogChart: FC = () => {
     <Box>
       <Line
         ref={lineRef}
+        width={1280}
+        height={700}
         options={{
           responsive: true,
           plugins: {
             // @ts-ignore
-            draggableSelectRange: getDraggableSelectRangeConfig(),
+            draggableSelectRange: getDraggableSelectRangeConfig({
+              onSelect: ({ range }) => console.log(range),
+            }),
           },
         }}
         data={{

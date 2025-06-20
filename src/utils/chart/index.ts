@@ -1,4 +1,14 @@
-export const getDraggableSelectRangeConfig = () => ({
+export interface DraggableSelectEvent {
+  range: [string, string]
+}
+
+export interface GetDraggableSelectRangeOptions {
+  onSelect: (event: DraggableSelectEvent) => void
+}
+
+export const getDraggableSelectRangeConfig = (
+  options: GetDraggableSelectRangeOptions,
+) => ({
   enable: true,
   unselectColor: 'rgba(255,255,255,0.65)',
   borderColor: '#2388FF',
@@ -13,4 +23,5 @@ export const getDraggableSelectRangeConfig = () => ({
       size: 13,
     },
   },
+  onSelect: options.onSelect,
 })
