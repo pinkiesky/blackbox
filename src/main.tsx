@@ -8,6 +8,7 @@ import {
   LineElement,
   PointElement,
   Tooltip,
+  Filler,
 } from 'chart.js'
 import DraggableSelectRangePlugin from 'chartjs-plugin-draggable-selectrange'
 import App from './App.tsx'
@@ -16,6 +17,7 @@ import './index.css'
 Chart.register(
   DraggableSelectRangePlugin,
   CategoryScale,
+  Filler,
   LinearScale,
   PointElement,
   LineElement,

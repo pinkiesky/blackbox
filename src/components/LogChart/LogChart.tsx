@@ -38,8 +38,8 @@ const LogChart: FC<Props> = ({ onSelect }) => {
       chartArea: { top, bottom },
     } = context.chart
     const gradient = ctx.createLinearGradient(0, top, 0, bottom)
-    gradient.addColorStop(0, 'rgba(141,193,255,1)')
-    gradient.addColorStop(1, 'rgba(141,193,255,0)')
+    gradient.addColorStop(0, 'rgb(29,132,255)')
+    gradient.addColorStop(1, 'rgba(173,215,255,0)')
 
     return gradient
   }
@@ -67,9 +67,9 @@ const LogChart: FC<Props> = ({ onSelect }) => {
               data: altitudeM,
               pointRadius: 0,
               pointHoverRadius: 0,
-              borderColor: '#2388FF',
-              backgroundColor: getBackgroundColor,
+              borderColor: '#007bff',
               fill: true,
+              backgroundColor: getBackgroundColor,
             },
           ],
         }}
