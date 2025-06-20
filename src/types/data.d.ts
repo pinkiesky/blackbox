@@ -112,7 +112,7 @@ export interface LogStats {
 export interface LogRecord {
   flightTimeSec: number
   coordinates: LocationData
-  altitude: number
+  altitudeM: number
   date: Date
   groundSpeedKmh: number
   headingDeg: number

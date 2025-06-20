@@ -14,7 +14,8 @@ import {
   ValueCalculator,
 } from './utils'
 import LogChart from '@/components/LogChart/LogChart.tsx'
-import { useDataStore } from '@/store/data.ts'
+import { useLogStore } from '@/store/log.ts'
+import type { DraggableSelectEvent } from '@/utils/chart'
 
 const styles: Record<string, SxProps> = {
   app: {
@@ -43,7 +44,7 @@ const styles: Record<string, SxProps> = {
 
 function App() {
   const [data, saveData] = useLocalStorage<string | null>('RawData2', null)
-  const { setData } = useDataStore()
+  const { setLog } = useLogStore()
 
   const [rawLog, setRawLog] = useState<Log | null>(null)
 
@@ -79,7 +80,7 @@ function App() {
       ...rawLog,
     }
     logData.records = resampleData(rawLog.records, 0.5)
-    setData(logData)
+    setLog(logData)
 
     return logData
   }, [rawLog])
@@ -103,7 +104,7 @@ function App() {
         ? record.flightTimeSec - prevRecord.flightTimeSec
         : 1
 
-      altitudeCalculator.addValueWeighted(record.altitude, weight)
+      altitudeCalculator.addValueWeighted(record.altitudeM, weight)
       speedCalculator.addValueWeighted(record.groundSpeedKmh, weight)
       transmitterPowerCalculator.addValueWeighted(
         record.transmitterPowerMw,
@@ -113,7 +114,7 @@ function App() {
         record.transmitterLinkQuality,
         weight,
       )
-      distanceCalculator.addPoint(record.coordinates, record.altitude)
+      distanceCalculator.addPoint(record.coordinates, record.altitudeM)
       rollDerivativeCalculator.addValue(record.rollRad, weight)
     }
 
@@ -151,6 +152,10 @@ function App() {
   const parseRawData = async (rawData: string): Promise<Log> => {
     console.log('Parsing raw data...', rawData.length, 'characters')
     return await parseRadiomasterLogs(rawData)
+  }
+
+  const onRangeSelect = ({ range }: DraggableSelectEvent) => {
+    console.log(range)
   }
 
   const onUploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -200,11 +205,10 @@ function App() {
               <MapControls clear={clearData} />
             </Box>
 
-            <Map data={log!} stat={globalLogStatistic!} />
+            <Map stat={globalLogStatistic!} />
           </Box>
-
           <Box sx={styles.chart}>
-            <LogChart />
+            <LogChart onSelect={onRangeSelect} />
           </Box>
         </>
       )}

@@ -29,7 +29,7 @@ export type LineConfigHandler = (
 ) => Segment['config']
 
 export function useMapPositions(
-  log: Log,
+  log: Log | null,
   stat: LogStatistics,
   lch: LineConfigHandler,
 ): UseMapPositionsReturn {
@@ -43,6 +43,8 @@ export function useMapPositions(
   const [path, setPath] = useState<LocationData[]>([])
 
   const segments: Segment[] = useMemo(() => {
+    if (!log) return []
+
     const segments: Segment[] = []
 
     let currentSegment: Segment | null = null
@@ -76,7 +78,8 @@ export function useMapPositions(
   }, [lch, log])
 
   const initCenterPosition = () => {
-    if (log.records.length === 0) return
+    if (!log || log.records.length === 0) return
+
     setCenterPosition({
       lat: log.records[0].coordinates.lat,
       lng: log.records[0].coordinates.lng,
@@ -84,7 +87,7 @@ export function useMapPositions(
   }
 
   const initPath = () => {
-    if (log.records.length === 0) return
+    if (!log || log.records.length === 0) return
 
     const newPath: LocationData[] = log.records.map(
       ({ coordinates }): LocationData => {
@@ -96,10 +99,14 @@ export function useMapPositions(
   }
 
   const initStartPosition = () => {
+    if (!log) return
+
     setStartPosition(log.records[0].coordinates)
   }
 
   const initFinishPosition = () => {
+    if (!log) return
+
     const gps = log.records[log.records.length - 1].coordinates
     setFinishPosition({ lat: gps.lat, lng: gps.lng })
   }

@@ -102,9 +102,9 @@ export function resampleData(
           fraction,
         ),
       },
-      altitude: linearInterpolate(
-        firstRecord.altitude,
-        secondRecord.altitude,
+      altitudeM: linearInterpolate(
+        firstRecord.altitudeM,
+        secondRecord.altitudeM,
         fraction,
       ),
       date: new Date(data[0].date.getTime() + time * 1000),

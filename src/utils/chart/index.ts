@@ -15,12 +15,10 @@ export const getDraggableSelectRangeConfig = (
   borderWidth: 2,
   text: {
     enable: true,
-    color: '#000',
-    offset: -15,
-    padding: 1,
+    color: '#fff',
     font: {
-      family: 'Arial',
-      size: 13,
+      family: 'Roboto, sans-serif',
+      size: 20,
     },
   },
   onSelect: options.onSelect,

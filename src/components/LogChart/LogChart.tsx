@@ -2,34 +2,42 @@ import { type FC, useEffect, useRef, useState } from 'react'
 import { format } from 'date-fns'
 import { Line } from 'react-chartjs-2'
 import { Box } from '@mui/material'
-import { useDataStore } from '@/store/data.ts'
-import { getDraggableSelectRangeConfig } from '@/utils/chart'
+import { useLogStore } from '@/store/log.ts'
+import {
+  type DraggableSelectEvent,
+  getDraggableSelectRangeConfig,
+} from '@/utils/chart'
+import type { ScriptableContext } from 'chart.js'
 
-const LogChart: FC = () => {
-  const { data } = useDataStore()
+interface Props {
+  onSelect: (event: DraggableSelectEvent) => void
+}
+
+const LogChart: FC<Props> = ({ onSelect }) => {
+  const { log } = useLogStore()
 
   const lineRef = useRef<any>(null)
-  const [altitude, setAltitude] = useState<number[]>([])
+  const [altitudeM, setAltitudeM] = useState<number[]>([])
   const [dates, setDates] = useState<string[]>([])
 
   useEffect(() => {
-    if (!data) return
+    if (!log) return
 
-    const altitudeData = data.records.map((log) => log.altitude)
-    const dates = data.records.map((log) => format(log.date, 'HH:mm:ss'))
+    const altitudeMData = log.records.map((log) => log.altitudeM)
+    const dates = log.records.map((log) => format(log.date, 'HH:mm:ss'))
 
-    setAltitude(altitudeData)
+    setAltitudeM(altitudeMData)
     setDates(dates)
-  }, [data])
+  }, [log])
 
-  function getBackgroundColor() {
-    if (!lineRef.current) return
+  function getBackgroundColor(context: ScriptableContext<'line'>) {
+    if (!context.chart.chartArea) return
 
-    const canvas = lineRef.current.canvas
-    if (!canvas) return
-
-    const ctx = canvas.getContext('2d')
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
+    const {
+      ctx,
+      chartArea: { top, bottom },
+    } = context.chart
+    const gradient = ctx.createLinearGradient(0, top, 0, bottom)
     gradient.addColorStop(0, 'rgba(141,193,255,1)')
     gradient.addColorStop(1, 'rgba(141,193,255,0)')
 
@@ -47,7 +55,7 @@ const LogChart: FC = () => {
           plugins: {
             // @ts-ignore
             draggableSelectRange: getDraggableSelectRangeConfig({
-              onSelect: ({ range }) => console.log(range),
+              onSelect,
             }),
           },
         }}
@@ -55,11 +63,12 @@ const LogChart: FC = () => {
           labels: dates,
           datasets: [
             {
-              data: altitude,
+              label: 'Altitude',
+              data: altitudeM,
               pointRadius: 0,
               pointHoverRadius: 0,
               borderColor: '#2388FF',
-              backgroundColor: getBackgroundColor(),
+              backgroundColor: (context) => getBackgroundColor(context),
               fill: true,
             },
           ],

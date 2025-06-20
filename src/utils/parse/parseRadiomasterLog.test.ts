@@ -25,11 +25,11 @@ describe('parseRadiomasterLogs', () => {
     const firstRecord = result.records[0]
     expect(firstRecord.flightTimeSec).toBeCloseTo(0, 2)
     expect(firstRecord.coordinates).toEqual({ lat: 41.8635, lng: 45.279461 })
-    expect(firstRecord.altitude).toBe(0)
+    expect(firstRecord.altitudeM).toBe(0)
 
     const lastRecord = result.records[3]
     expect(lastRecord.flightTimeSec).toBeCloseTo(1.36, 2)
     expect(lastRecord.coordinates).toEqual({ lat: 41, lng: 0.279461 })
-    expect(lastRecord.altitude).toBe(3)
+    expect(lastRecord.altitudeM).toBe(3)
   })
 })

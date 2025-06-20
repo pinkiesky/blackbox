@@ -31,7 +31,7 @@ export async function parseRadiomasterLogs(text: string): Promise<Log> {
     const data = {
       flightTimeSec: (parsedDate.getTime() - startTime.getTime()) / 1000,
       coordinates,
-      altitude: safeParseNumber(record['Alt(m)']),
+      altitudeM: safeParseNumber(record['Alt(m)']),
       date: parsedDate,
       groundSpeedKmh: safeParseNumber(record['GSpd(kmh)']),
       headingDeg: safeParseNumber(record['Hdg(°)']),
