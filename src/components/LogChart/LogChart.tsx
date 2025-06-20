@@ -68,7 +68,7 @@ const LogChart: FC<Props> = ({ onSelect }) => {
               pointRadius: 0,
               pointHoverRadius: 0,
               borderColor: '#2388FF',
-              backgroundColor: (context) => getBackgroundColor(context),
+              backgroundColor: getBackgroundColor,
               fill: true,
             },
           ],
