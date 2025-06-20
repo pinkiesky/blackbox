@@ -35,12 +35,45 @@ export function circularInterpolate(
   return result
 }
 
+export function circularInterpolateRadians(
+  start: number,
+  end: number,
+  fraction: number,
+): number {
+  // Handle circular interpolation for angles in radians (-π to π)
+  let diff = end - start
+
+  // Find the shortest angular distance
+  const TWO_PI = 2 * Math.PI
+  if (diff > Math.PI) {
+    diff -= TWO_PI
+  } else if (diff < -Math.PI) {
+    diff += TWO_PI
+  }
+
+  let result = start + diff * fraction
+
+  // Normalize to [-π, π] range
+  while (result > Math.PI) {
+    result -= TWO_PI
+  }
+  while (result <= -Math.PI) {
+    result += TWO_PI
+  }
+
+  return result
+}
+
 export function resampleData(
   data: LogRecord[],
   targetFrequencySec: number,
 ): LogRecord[] {
   if (data.length === 0) {
     return []
+  }
+
+  if (targetFrequencySec <= 0) {
+    throw new Error('Target frequency must be positive.')
   }
 
   if (data[0].flightTimeSec !== 0) {
@@ -60,16 +93,31 @@ export function resampleData(
     },
   })
 
-  for (
-    let time = targetFrequencySec;
-    time <= totalDuration;
-    time += targetFrequencySec
-  ) {
+  // Use integer-based loop to avoid floating-point accumulation
+  const numSteps = Math.floor(totalDuration / targetFrequencySec)
+
+  for (let step = 1; step <= numSteps; step++) {
+    const time = step * targetFrequencySec
+
     const secondRecordIndex = data.findIndex(
       (record) => record.flightTimeSec >= time,
     )
+
     if (secondRecordIndex === -1) {
-      resampled.push({ ...resampled[resampled.length - 1] })
+      // Use the actual last data record, not the last resampled record
+      const lastRecord = data[data.length - 1]
+      resampled.push({
+        ...lastRecord,
+        flightTimeSec: time,
+        date: new Date(data[0].date.getTime() + time * 1000),
+        $resample: {
+          deviationSec: Math.abs(time - lastRecord.flightTimeSec),
+          interpolated: false,
+          originalFirstRecord: lastRecord,
+          originalSecondRecord: lastRecord,
+          time,
+        },
+      })
       continue
     }
 
@@ -77,6 +125,7 @@ export function resampleData(
     if (firstRecordIndex < 0) {
       throw new Error('Fatal: no valid first record found for interpolation.')
     }
+
     const secondRecord = data[secondRecordIndex]
     const firstRecord = data[firstRecordIndex]
 
@@ -88,6 +137,7 @@ export function resampleData(
     const fraction =
       (time - firstRecord.flightTimeSec) /
       (secondRecord.flightTimeSec - firstRecord.flightTimeSec)
+
     const interpolatedRecord: LogRecord = {
       flightTimeSec: time,
       coordinates: {
@@ -138,17 +188,18 @@ export function resampleData(
         secondRecord.verticalSpeedMps,
         fraction,
       ),
-      rollRad: linearInterpolate(
+      // Fix: Use radian-specific circular interpolation
+      rollRad: circularInterpolateRadians(
         firstRecord.rollRad,
         secondRecord.rollRad,
         fraction,
       ),
-      pitchRad: linearInterpolate(
+      pitchRad: circularInterpolateRadians(
         firstRecord.pitchRad,
         secondRecord.pitchRad,
         fraction,
       ),
-      yawRad: linearInterpolate(
+      yawRad: circularInterpolateRadians(
         firstRecord.yawRad,
         secondRecord.yawRad,
         fraction,

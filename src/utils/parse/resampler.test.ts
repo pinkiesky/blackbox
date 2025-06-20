@@ -3,6 +3,7 @@ import {
   resampleData,
   linearInterpolate,
   circularInterpolate,
+  circularInterpolateRadians,
 } from './resampler'
 import type { LogRecord } from '@/types/data'
 
@@ -42,6 +43,136 @@ describe('circularInterpolate', () => {
   it('should handle large angle differences correctly', () => {
     // From 90° to 270° - shortest path is 180°
     expect(circularInterpolate(90, 270, 0.5)).toBe(180)
+  })
+})
+
+describe('circularInterpolateRadians', () => {
+  it('should interpolate correctly for normal angles in radians', () => {
+    // π/6 to π/3 (30° to 60°) - midpoint should be π/4 (45°)
+    expect(
+      circularInterpolateRadians(Math.PI / 6, Math.PI / 3, 0.5),
+    ).toBeCloseTo(Math.PI / 4, 10)
+
+    // 0 to π/2 (0° to 90°) - midpoint should be π/4 (45°)
+    expect(circularInterpolateRadians(0, Math.PI / 2, 0.5)).toBeCloseTo(
+      Math.PI / 4,
+      10,
+    )
+
+    // Basic linear interpolation for small angles
+    expect(circularInterpolateRadians(0.1, 0.3, 0.5)).toBeCloseTo(0.2, 10)
+  })
+
+  it('should handle crossing π boundary correctly (positive to negative)', () => {
+    // From 3π/4 to -3π/4 should go the short way through π, not through 0
+    // Short path: 3π/4 → π → -3π/4 (angular distance = π/2)
+    const start = (3 * Math.PI) / 4 // 135°
+    const end = -(3 * Math.PI) / 4 // -135°
+
+    // Midpoint should be π (180°)
+    expect(circularInterpolateRadians(start, end, 0.5)).toBeCloseTo(Math.PI, 10)
+
+    // Quarter way should be 7π/8 (157.5°)
+    expect(circularInterpolateRadians(start, end, 0.25)).toBeCloseTo(
+      (7 * Math.PI) / 8,
+      10,
+    )
+
+    // Three quarters should be -7π/8 (-157.5°)
+    expect(circularInterpolateRadians(start, end, 0.75)).toBeCloseTo(
+      -(7 * Math.PI) / 8,
+      10,
+    )
+  })
+
+  it('should handle crossing -π boundary correctly (negative to positive)', () => {
+    // From -3π/4 to 3π/4 should go the short way through -π, not through 0
+    const start = -(3 * Math.PI) / 4 // -135°
+    const end = (3 * Math.PI) / 4 // 135°
+
+    // Midpoint should be -π (-180°)
+    expect(circularInterpolateRadians(start, end, 0.5)).toBeCloseTo(
+      -Math.PI,
+      10,
+    )
+  })
+
+  it('should handle edge cases at exact boundaries', () => {
+    // From π to -π (equivalent angles)
+    expect(circularInterpolateRadians(Math.PI, -Math.PI, 0.5)).toBeCloseTo(
+      Math.PI,
+      10,
+    )
+
+    // From -π to π (equivalent angles)
+    expect(circularInterpolateRadians(-Math.PI, Math.PI, 0.5)).toBeCloseTo(
+      -Math.PI,
+      10,
+    )
+  })
+
+  it('should handle fraction values of 0 and 1', () => {
+    const start = Math.PI / 4
+    const end = (3 * Math.PI) / 4
+
+    // fraction = 0 should return start value
+    expect(circularInterpolateRadians(start, end, 0)).toBeCloseTo(start, 10)
+
+    // fraction = 1 should return end value
+    expect(circularInterpolateRadians(start, end, 1)).toBeCloseTo(end, 10)
+  })
+
+  it('should handle small angle differences correctly', () => {
+    // Very small difference - should behave like linear interpolation
+    const start = 0.1
+    const end = 0.2
+    expect(circularInterpolateRadians(start, end, 0.5)).toBeCloseTo(0.15, 10)
+  })
+
+  it('should handle angles near zero crossing', () => {
+    // From -0.1 to 0.1 rad - should go directly, not around
+    expect(circularInterpolateRadians(-0.1, 0.1, 0.5)).toBeCloseTo(0, 10)
+
+    // From 0.1 to -0.1 rad - should go directly
+    expect(circularInterpolateRadians(0.1, -0.1, 0.5)).toBeCloseTo(0, 10)
+  })
+
+  it('should handle maximum angular difference (π radians)', () => {
+    // π/2 to -π/2 - exactly π radians apart
+    // Could go either way, but should be consistent
+    const result = circularInterpolateRadians(Math.PI / 2, -Math.PI / 2, 0.5)
+    // Should be either π or -π (both equivalent)
+    expect(Math.abs(Math.abs(result) - Math.PI)).toBeCloseTo(Math.PI, 10)
+  })
+
+  it('should handle typical aircraft attitude angles', () => {
+    // Roll from -π/4 to π/4 (level flight oscillation)
+    expect(
+      circularInterpolateRadians(-Math.PI / 4, Math.PI / 4, 0.5),
+    ).toBeCloseTo(0, 10)
+
+    // Pitch from -π/6 to π/6 (climb to dive)
+    expect(
+      circularInterpolateRadians(-Math.PI / 6, Math.PI / 6, 0.5),
+    ).toBeCloseTo(0, 10)
+
+    // Yaw turning around - from 2.5 to -2.5 (crossing ±π)
+    const yawResult = circularInterpolateRadians(2.5, -2.5, 0.5)
+    // Should go the short way through π/-π
+    expect(Math.abs(Math.abs(yawResult) - Math.PI)).toBeLessThan(0.1)
+  })
+
+  it('should be consistent with reverse interpolation', () => {
+    const start = Math.PI / 3
+    const end = (2 * Math.PI) / 3
+
+    // Forward interpolation at 0.3
+    const forward = circularInterpolateRadians(start, end, 0.3)
+
+    // Reverse interpolation at 0.7 should give same result
+    const reverse = circularInterpolateRadians(end, start, 0.7)
+
+    expect(forward).toBeCloseTo(reverse, 10)
   })
 })
 
