@@ -1,5 +1,11 @@
 import { useMemo, useState } from 'react'
-import type { LocationData, Log, LogRecord, Segment } from '@/types/data'
+import type {
+  LocationData,
+  Log,
+  LogRecord,
+  LogStatistics,
+  Segment,
+} from '@/types/data'
 import { compareObjectsRecursively } from '@/utils'
 
 interface UseMapPositionsReturn {
@@ -17,13 +23,14 @@ interface UseMapPositionsReturn {
   initFinishPosition: () => void
 }
 
-export type LineConfigHandler = (record: LogRecord, log: Log) => {
-  opacity: number
-  color: string
-}
+export type LineConfigHandler = (
+  record: LogRecord,
+  stat: LogStatistics,
+) => Segment['config']
 
 export function useMapPositions(
   log: Log,
+  stat: LogStatistics,
   lch: LineConfigHandler,
 ): UseMapPositionsReturn {
   const [centerPosition, setCenterPosition] = useState<LocationData | null>(
@@ -39,10 +46,10 @@ export function useMapPositions(
     const segments: Segment[] = []
 
     let currentSegment: Segment | null = null
-    for (let i = 0; i < log.data.length; i++) {
-      const record = log.data[i]
+    for (let i = 0; i < log.records.length; i++) {
+      const record = log.records[i]
 
-      const recordConfig = lch(record, log)
+      const recordConfig = lch(record, stat)
 
       if (!currentSegment) {
         currentSegment = {
@@ -69,18 +76,17 @@ export function useMapPositions(
   }, [lch, log])
 
   const initCenterPosition = () => {
-    if (log.data.length === 0) return
-
-    const arrayCenterIndex = Math.floor(log.data.length / 2)
-    const gps = log.data[arrayCenterIndex].coordinates
-
-    setCenterPosition(gps)
+    if (log.records.length === 0) return
+    setCenterPosition({
+      lat: log.records[0].coordinates.lat,
+      lng: log.records[0].coordinates.lng,
+    })
   }
 
   const initPath = () => {
-    if (log.data.length === 0) return
+    if (log.records.length === 0) return
 
-    const newPath: LocationData[] = log.data.map(
+    const newPath: LocationData[] = log.records.map(
       ({ coordinates }): LocationData => {
         return { ...coordinates }
       },
@@ -90,11 +96,11 @@ export function useMapPositions(
   }
 
   const initStartPosition = () => {
-    setStartPosition(log.data[0].coordinates)
+    setStartPosition(log.records[0].coordinates)
   }
 
   const initFinishPosition = () => {
-    const gps = log.data[log.data.length - 1].coordinates
+    const gps = log.records[log.records.length - 1].coordinates
     setFinishPosition({ lat: gps.lat, lng: gps.lng })
   }
 

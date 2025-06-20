@@ -10,7 +10,13 @@ export interface Segment {
   config: {
     opacity?: number
     color?: string
+    popoverText?: string // text to show in the popover
   }
+}
+
+export interface Arrow {
+  position: LatLngLiteral
+  bearingDeg: number // in degrees
 }
 
 export interface RadiomasterLogRecord {
@@ -91,16 +97,16 @@ export interface RadiomasterLogRecord {
 }
 
 export interface Log {
-  data: LogRecord[]
+  records: LogRecord[]
   startTime: Date
   endTime: Date
   durationSec: number
   title: string
+}
 
-  stats: {
-    altitude: ValueData
-    groundSpeedKmh: ValueData
-  }
+export interface LogStats {
+  altitude: ValueData
+  groundSpeedKmh: ValueData
 }
 
 export interface LogRecord {
@@ -110,6 +116,13 @@ export interface LogRecord {
   date: Date
   groundSpeedKmh: number
   headingDeg: number
+  transmitterLinkQuality: number
+  transmitterPowerMw: number // in milliwatts
+  amperageCurrentA: number
+  verticalSpeedMps: number
+  rollRad: number
+  pitchRad: number
+  yawRad: number
 
   $resample?: {
     deviationSec?: number // deviation from the original record in seconds
@@ -118,4 +131,12 @@ export interface LogRecord {
     originalSecondRecord?: LogRecord // the second record used for interpolation
     time: number
   }
+}
+
+export interface LogStatistics {
+  altitude: ValueData
+  groundSpeedKmh: ValueData
+  transmitterPowerMw: ValueData
+  transmitterLinkQuality: ValueData
+  totalDistanceM: number
 }

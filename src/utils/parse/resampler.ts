@@ -118,6 +118,41 @@ export function resampleData(
         secondRecord.headingDeg,
         fraction,
       ),
+      transmitterLinkQuality: linearInterpolate(
+        firstRecord.transmitterLinkQuality,
+        secondRecord.transmitterLinkQuality,
+        fraction,
+      ),
+      transmitterPowerMw: linearInterpolate(
+        firstRecord.transmitterPowerMw,
+        secondRecord.transmitterPowerMw,
+        fraction,
+      ),
+      amperageCurrentA: linearInterpolate(
+        firstRecord.amperageCurrentA,
+        secondRecord.amperageCurrentA,
+        fraction,
+      ),
+      verticalSpeedMps: linearInterpolate(
+        firstRecord.verticalSpeedMps,
+        secondRecord.verticalSpeedMps,
+        fraction,
+      ),
+      rollRad: linearInterpolate(
+        firstRecord.rollRad,
+        secondRecord.rollRad,
+        fraction,
+      ),
+      pitchRad: linearInterpolate(
+        firstRecord.pitchRad,
+        secondRecord.pitchRad,
+        fraction,
+      ),
+      yawRad: linearInterpolate(
+        firstRecord.yawRad,
+        secondRecord.yawRad,
+        fraction,
+      ),
       $resample: {
         deviationSec: minDeviationSec,
         interpolated: true,

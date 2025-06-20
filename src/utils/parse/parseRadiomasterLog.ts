@@ -1,6 +1,6 @@
 import type { Log, LogRecord, RadiomasterLogRecord } from '@/types/data'
 import { parseCsv } from '.'
-import { safeParseNumber, ValueCalculator } from '..'
+import { safeParseNumber } from '..'
 
 export async function parseRadiomasterLogs(text: string): Promise<Log> {
   const data = (await parseCsv(text)) as RadiomasterLogRecord[]
@@ -10,9 +10,6 @@ export async function parseRadiomasterLogs(text: string): Promise<Log> {
 
   let startTime: Date | null = null
   let endTime: Date | null = null
-
-  const speedCalculator = new ValueCalculator()
-  const altitudeCalculator = new ValueCalculator()
 
   const records = data.map((record): LogRecord => {
     const parsedDate = new Date(`${record.Date}T${record.Time}Z`)
@@ -38,10 +35,14 @@ export async function parseRadiomasterLogs(text: string): Promise<Log> {
       date: parsedDate,
       groundSpeedKmh: safeParseNumber(record['GSpd(kmh)']),
       headingDeg: safeParseNumber(record['Hdg(°)']),
+      transmitterLinkQuality: safeParseNumber(record['TQly(%)']),
+      transmitterPowerMw: safeParseNumber(record['TPWR(mW)']),
+      amperageCurrentA: safeParseNumber(record['Curr(A)']),
+      verticalSpeedMps: safeParseNumber(record['VSpd(m/s)']),
+      rollRad: safeParseNumber(record['Roll(rad)']),
+      pitchRad: safeParseNumber(record['Ptch(rad)']),
+      yawRad: safeParseNumber(record['Yaw(rad)']),
     }
-
-    speedCalculator.addValue(data.groundSpeedKmh)
-    altitudeCalculator.addValue(data.altitude)
 
     return data
   })
@@ -50,14 +51,10 @@ export async function parseRadiomasterLogs(text: string): Promise<Log> {
 
   // TODO move statistics calculation to a separate function
   return {
-    data: records,
+    records,
     startTime: startTime!,
     endTime: endTime!,
     durationSec,
     title: `Radiomaster Log from ${startTime!.toLocaleString()} to ${endTime!.toLocaleString()}`,
-    stats: {
-      altitude: altitudeCalculator.getValue(),
-      groundSpeedKmh: speedCalculator.getValue(),
-    },
   }
 }

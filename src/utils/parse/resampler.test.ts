@@ -61,6 +61,13 @@ describe('resampleData', () => {
     date: new Date(baseDate.getTime() + flightTimeSec * 1000),
     groundSpeedKmh,
     headingDeg,
+    transmitterLinkQuality: 0,
+    transmitterPowerMw: 0,
+    amperageCurrentA: 0,
+    verticalSpeedMps: 0,
+    rollRad: 0,
+    pitchRad: 0,
+    yawRad: 0,
   })
 
   it('should return empty array for empty input', () => {
