@@ -1,13 +1,3 @@
-import DraggableSelectRangePlugin from 'chartjs-plugin-draggable-selectrange'
-import {
-  Chart,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-} from 'chart.js'
 import { type ChangeEvent, useEffect, useMemo, useState } from 'react'
 import { Box, Button, type SxProps, Typography } from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
@@ -25,16 +15,6 @@ import {
 } from './utils'
 import LogChart from '@/components/LogChart/LogChart.tsx'
 import { useDataStore } from '@/store/data.ts'
-
-Chart.register(
-  DraggableSelectRangePlugin,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-)
 
 const styles: Record<string, SxProps> = {
   app: {
