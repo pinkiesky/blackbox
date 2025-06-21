@@ -13,6 +13,9 @@ import {
   DistanceCalculator,
   ValueCalculator,
 } from './utils'
+import LogChart from '@/components/LogChart/LogChart.tsx'
+import { useLogStore } from '@/store/log.ts'
+import type { DraggableSelectEvent } from '@/utils/chart'
 
 const styles: Record<string, SxProps> = {
   app: {
@@ -22,6 +25,7 @@ const styles: Record<string, SxProps> = {
     display: 'flex',
     gap: '24px',
     maxWidth: '1280px',
+    paddingTop: '2rem',
     margin: '0 auto',
     textAlign: 'center',
   },
@@ -33,10 +37,15 @@ const styles: Record<string, SxProps> = {
     textAlign: 'left',
     fontSize: '20px',
   },
+  chart: {
+    marginTop: '24px',
+  },
 }
 
 function App() {
   const [data, saveData] = useLocalStorage<string | null>('RawData2', null)
+  const { setLog } = useLogStore()
+
   const [rawLog, setRawLog] = useState<Log | null>(null)
 
   useEffect(() => {
@@ -71,11 +80,11 @@ function App() {
       ...rawLog,
     }
     logData.records = resampleData(rawLog.records, 0.5)
+    setLog(logData)
 
     return logData
   }, [rawLog])
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const globalLogStatistic = useMemo<LogStatistics | null>(() => {
     if (!rawLog) {
       return null
@@ -142,9 +151,11 @@ function App() {
 
   const parseRawData = async (rawData: string): Promise<Log> => {
     console.log('Parsing raw data...', rawData.length, 'characters')
-    const log = await parseRadiomasterLogs(rawData)
+    return await parseRadiomasterLogs(rawData)
+  }
 
-    return log
+  const onRangeSelect = ({ range }: DraggableSelectEvent) => {
+    console.log(range)
   }
 
   const onUploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -184,17 +195,22 @@ function App() {
       )}
 
       {log && globalLogStatistic && (
-        <Box sx={styles.map}>
-          <Box sx={styles.mapInfo}>
-            <Typography sx={styles.mapTitle}>
-              {log.title || 'Unknown Log'}
-            </Typography>
+        <>
+          <Box sx={styles.map}>
+            <Box sx={styles.mapInfo}>
+              <Typography sx={styles.mapTitle}>
+                {log.title || 'Unknown Log'}
+              </Typography>
 
-            <MapControls clear={clearData} />
+              <MapControls clear={clearData} />
+            </Box>
+
+            <Map stat={globalLogStatistic!} />
           </Box>
-
-          <Map data={log!} stat={globalLogStatistic!} />
-        </Box>
+          <Box sx={styles.chart}>
+            <LogChart onSelect={onRangeSelect} />
+          </Box>
+        </>
       )}
     </>
   )

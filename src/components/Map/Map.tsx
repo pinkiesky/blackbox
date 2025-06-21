@@ -1,24 +1,24 @@
-import { type FC, useEffect, useMemo, useState } from 'react'
+import { type FC, useEffect, useMemo, useState, type MouseEvent } from 'react'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 import { IconButton, Menu, MenuItem, ListItemText, Box } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import type { CSSProperties } from '@mui/material'
+import { LatLng } from 'leaflet'
+import 'leaflet-providers'
+import { interpolateHsl } from 'd3-interpolate'
 import type {
   Arrow,
   LocationData,
-  Log,
   LogRecord,
   LogStatistics,
   Segment,
 } from '@/types/data'
+import { useLogStore } from '@/store/log.ts'
 import { useMapPositions } from '@/hooks/useMapPositions'
 import { StartIcon } from '@/components/icons/StartIcon'
 import { FinishIcon } from '@/components/icons/FinishIcon'
 import MapPolylines from '@/components/MapPolylines/MapPolylines.tsx'
-import 'leaflet-providers'
 import MapArrows from '../MapPolylines/MapArrows'
-import { LatLng } from 'leaflet'
-import { interpolateHsl } from 'd3-interpolate'
 
 function getDistanceBetweenPoints(
   coordinates: LocationData,
@@ -30,7 +30,6 @@ function getDistanceBetweenPoints(
 }
 
 interface Props {
-  data: Log
   stat: LogStatistics
 }
 
@@ -115,7 +114,8 @@ function lch(record: LogRecord, stat: LogStatistics): Segment['config'] {
   }
 }
 
-const Map: FC<Props> = ({ data, stat }) => {
+const Map: FC<Props> = ({ stat }) => {
+  const { log } = useLogStore()
   const [selectedProvider, setSelectedProvider] = useState<MapProvider>(
     mapProviders[0],
   )
@@ -131,23 +131,25 @@ const Map: FC<Props> = ({ data, stat }) => {
     initPath,
     initStartPosition,
     initFinishPosition,
-  } = useMapPositions(data, stat, lch)
+  } = useMapPositions(log, stat, lch)
 
   useEffect(() => {
     initCenterPosition()
     initPath()
     initStartPosition()
     initFinishPosition()
-  }, [data])
+  }, [log])
 
   const arrows = useMemo((): Arrow[] => {
+    if (!log) return []
+
     const arrowInterval = 1000 // 500 meters
     const arrows: Arrow[] = []
     let distanceAccumulator: number = 0
 
-    for (let i = 0; i < data.records.length - 1; i++) {
-      const start = data.records[i]
-      const end = data.records[i + 1]
+    for (let i = 0; i < log.records.length - 1; i++) {
+      const start = log.records[i]
+      const end = log.records[i + 1]
       const distance = getDistanceBetweenPoints(
         start.coordinates,
         end.coordinates,
@@ -165,9 +167,9 @@ const Map: FC<Props> = ({ data, stat }) => {
     }
 
     return arrows
-  }, [data])
+  }, [log])
 
-  const handleSettingsClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleSettingsClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
   }
 

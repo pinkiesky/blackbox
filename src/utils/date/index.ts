@@ -4,10 +4,14 @@ interface Options {
   dateFormat: string
 }
 
-export const parseDate = (date: string, time?: string, options?: Options) => {
+export const parseDate = (
+  date: Date | string,
+  time?: string,
+  options?: Options,
+) => {
   if (!date && !time) return ''
 
-  let isoString = date || format(new Date(), 'yyyy-MM-dd')
+  let isoString = date.toLocaleString() || format(new Date(), 'yyyy-MM-dd')
   let formatStr = options?.dateFormat || 'dd.MM.yyyy'
 
   if (time) {
