@@ -1,6 +1,15 @@
 import { type FC, useEffect, useMemo, useState, type MouseEvent } from 'react'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
-import { IconButton, Menu, MenuItem, ListItemText, Box } from '@mui/material'
+import {
+  IconButton,
+  Menu,
+  MenuItem,
+  ListItemText,
+  Box,
+  Divider,
+  FormControlLabel,
+  Checkbox,
+} from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import type { CSSProperties } from '@mui/material'
 import { LatLng } from 'leaflet'
@@ -175,6 +184,33 @@ const Map: FC = () => {
                   <ListItemText primary={provider.name} />
                 </MenuItem>
               ))}
+              <Divider />
+              <MenuItem>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={true}
+                      name="altitude"
+                      size="small"
+                      sx={{ padding: '6px' }}
+                    />
+                  }
+                  label="Altitude"
+                />
+              </MenuItem>
+              <MenuItem>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={true}
+                      name="battery"
+                      size="small"
+                      sx={{ padding: '6px' }}
+                    />
+                  }
+                  label="Battery"
+                />
+              </MenuItem>
             </Menu>
           </Box>
           <MapContainer center={centerPosition} zoom={16} style={styles.map}>
