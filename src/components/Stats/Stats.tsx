@@ -1,4 +1,4 @@
-import type { FC } from 'react'
+import { type FC, useMemo } from 'react'
 import { useGlobalLogStatsStore } from '@/store/stats.ts'
 import {
   List,
@@ -18,102 +18,74 @@ import LinkIcon from '@mui/icons-material/Link'
 const Stats: FC = () => {
   const { stats } = useGlobalLogStatsStore()
 
+  const list = useMemo(() => {
+    if (!stats) return []
+
+    return [
+      {
+        icon: <HeightIcon color="info" />,
+        title: 'Altitude',
+        min: `${stats.altitude.min}m`,
+        max: `${stats.altitude.max}m`,
+      },
+      {
+        icon: <AirplaneIcon color="info" />,
+        title: 'Total distance',
+        text: `${stats.totalDistanceM.toFixed(0)}m`,
+      },
+      {
+        icon: <PowerIcon color="info" />,
+        title: 'Transmitter power',
+        min: `${stats.transmitterPowerMw.min}mw`,
+        max: `${stats.transmitterPowerMw.max}mw`,
+      },
+      {
+        icon: <LinkIcon color="info" />,
+        title: 'Transmitter link quality',
+        min: `${stats.transmitterLinkQuality.min}%`,
+        max: `${stats.transmitterLinkQuality.max}%`,
+      },
+    ]
+  }, [stats])
+
   return (
     <>
       {stats && (
         <List disablePadding>
-          <ListItem sx={{ paddingTop: '0' }}>
-            <ListItemAvatar>
-              <Avatar sx={{ backgroundColor: '#4c4848' }}>
-                <HeightIcon color="info" />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={
-                <Typography color="white" fontWeight="bold">
-                  Altitude
-                </Typography>
-              }
-              secondary={
-                <Typography color="white">{stats.altitude.max}m</Typography>
-              }
-            />
-          </ListItem>
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ backgroundColor: '#4c4848' }}>
-                <AirplaneIcon color="info" />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={
-                <Typography color="white" fontWeight="bold">
-                  Total distance
-                </Typography>
-              }
-              secondary={
-                <Typography color="white">
-                  {stats.totalDistanceM.toFixed(0)}m
-                </Typography>
-              }
-            />
-          </ListItem>
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ backgroundColor: '#4c4848' }}>
-                <PowerIcon color="info" />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={
-                <Typography color="white" fontWeight="bold">
-                  Transmitter power
-                </Typography>
-              }
-              secondary={
-                <Grid container spacing={1} marginTop={0.5}>
-                  <Chip
-                    label={`min: ${stats.transmitterPowerMw.min}mw`}
-                    color="primary"
-                    size="small"
-                  />
-                  <Chip
-                    label={`max: ${stats.transmitterPowerMw.max}mw`}
-                    color="error"
-                    size="small"
-                  />
-                </Grid>
-              }
-            />
-          </ListItem>
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ backgroundColor: '#4c4848' }}>
-                <LinkIcon color="info" />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={
-                <Typography color="white" fontWeight="bold">
-                  Transmitter link quality
-                </Typography>
-              }
-              secondary={
-                <Grid container spacing={1} marginTop={0.5}>
-                  <Chip
-                    label={`min: ${stats.transmitterLinkQuality.min}%`}
-                    color="primary"
-                    size="small"
-                  />
-                  <Chip
-                    label={`max: ${stats.transmitterLinkQuality.max}%`}
-                    color="error"
-                    size="small"
-                  />
-                </Grid>
-              }
-            />
-          </ListItem>
+          {list.map((item, idx) => (
+            <ListItem sx={{ paddingTop: idx === 0 ? '0' : '0.2rem' }}>
+              <ListItemAvatar>
+                <Avatar sx={{ backgroundColor: '#4c4848' }}>{item.icon}</Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={
+                  <Typography color="white" fontWeight="bold">
+                    {item.title}
+                  </Typography>
+                }
+                secondary={
+                  item.text ? (
+                    <Typography color="white">{item.text}</Typography>
+                  ) : (
+                    <>
+                      <Grid container spacing={1} marginTop={0.5}>
+                        <Chip
+                          label={`min: ${item.min}`}
+                          color="primary"
+                          size="small"
+                        />
+                        <Chip
+                          label={`max: ${item.max}`}
+                          color="error"
+                          size="small"
+                        />
+                      </Grid>
+                    </>
+                  )
+                }
+              />
+            </ListItem>
+          ))}
         </List>
       )}
     </>

@@ -24,20 +24,17 @@ import Stats from '@/components/Stats/Stats.tsx'
 
 const styles: Record<string, SxProps> = {
   app: {
-    padding: '1rem',
-  },
-  map: {
-    maxHeight: '40%',
-    paddingTop: '1rem',
-    margin: '0 auto',
-    textAlign: 'center',
+    margin: '1rem',
   },
   title: {
     textAlign: 'left',
-    fontSize: '20px',
+    fontSize: '1.5rem',
+  },
+  map: {
+    marginTop: '1rem',
   },
   chart: {
-    marginTop: '1rem',
+    marginTop: '0.5rem',
   },
 }
 
