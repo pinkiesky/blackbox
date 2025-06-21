@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react'
 import type {
   LocationData,
-  Log,
   LogRecord,
   LogStatistics,
   Segment,
 } from '@/types/data'
-import { compareObjectsRecursively } from '@/utils'
+import { compareObjectsRecursively } from '@/utils/derivative'
+import { useLogStore } from '@/store/log.ts'
+import { useGlobalLogStatsStore } from '@/store/stats.ts'
 
 interface UseMapPositionsReturn {
   /* States */
@@ -28,11 +29,10 @@ export type LineConfigHandler = (
   stat: LogStatistics,
 ) => Segment['config']
 
-export function useMapPositions(
-  log: Log | null,
-  stat: LogStatistics,
-  lch: LineConfigHandler,
-): UseMapPositionsReturn {
+export function useMapPositions(lch: LineConfigHandler): UseMapPositionsReturn {
+  const { log } = useLogStore()
+  const { stats } = useGlobalLogStatsStore()
+
   const [centerPosition, setCenterPosition] = useState<LocationData | null>(
     null,
   )
@@ -43,7 +43,7 @@ export function useMapPositions(
   const [path, setPath] = useState<LocationData[]>([])
 
   const segments: Segment[] = useMemo(() => {
-    if (!log) return []
+    if (!log || !stats) return []
 
     const segments: Segment[] = []
 
@@ -51,7 +51,7 @@ export function useMapPositions(
     for (let i = 0; i < log.records.length; i++) {
       const record = log.records[i]
 
-      const recordConfig = lch(record, stat)
+      const recordConfig = lch(record, stats)
 
       if (!currentSegment) {
         currentSegment = {

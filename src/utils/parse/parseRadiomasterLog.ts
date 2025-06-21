@@ -1,6 +1,6 @@
 import type { Log, LogRecord, RadiomasterLogRecord } from '@/types/data'
 import { parseCsv } from '.'
-import { safeParseNumber } from '..'
+import { safeParseNumber } from '../derivative'
 
 export async function parseRadiomasterLogs(text: string): Promise<Log> {
   const data = (await parseCsv(text)) as RadiomasterLogRecord[]

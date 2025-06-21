@@ -48,8 +48,7 @@ const LogChart: FC<Props> = ({ onSelect }) => {
     <Box>
       <Line
         ref={lineRef}
-        width={1280}
-        height={700}
+        height="65%"
         options={{
           responsive: true,
           plugins: {

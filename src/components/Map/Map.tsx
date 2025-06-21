@@ -13,6 +13,7 @@ import type {
   LogStatistics,
   Segment,
 } from '@/types/data'
+import { type MapProvider, mapProviders } from '@/utils/providers.ts'
 import { useLogStore } from '@/store/log.ts'
 import { useMapPositions } from '@/hooks/useMapPositions'
 import { StartIcon } from '@/components/icons/StartIcon'
@@ -29,54 +30,12 @@ function getDistanceBetweenPoints(
   )
 }
 
-interface Props {
-  stat: LogStatistics
-}
-
-interface MapProvider {
-  name: string
-  url: string
-  attribution: string
-}
-
-const mapProviders: MapProvider[] = [
-  {
-    name: 'Satellite (Esri)',
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
-  },
-  {
-    name: 'OpenStreetMap',
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  },
-  {
-    name: 'CartoDB Positron',
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-  },
-  {
-    name: 'CartoDB Dark Matter',
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-  },
-  {
-    name: 'Stamen Terrain',
-    url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png',
-    attribution:
-      'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  },
-]
-
 const styles: Record<string, CSSProperties> = {
   map: {
     width: '100%',
     height: '100%',
-    minWidth: '1000px',
-    minHeight: '900px',
+    minWidth: '1236px',
+    minHeight: '500px',
     borderRadius: '4px',
   },
   settingsContainer: {
@@ -114,7 +73,7 @@ function lch(record: LogRecord, stat: LogStatistics): Segment['config'] {
   }
 }
 
-const Map: FC<Props> = ({ stat }) => {
+const Map: FC = () => {
   const { log } = useLogStore()
   const [selectedProvider, setSelectedProvider] = useState<MapProvider>(
     mapProviders[0],
@@ -131,7 +90,7 @@ const Map: FC<Props> = ({ stat }) => {
     initPath,
     initStartPosition,
     initFinishPosition,
-  } = useMapPositions(log, stat, lch)
+  } = useMapPositions(lch)
 
   useEffect(() => {
     initCenterPosition()

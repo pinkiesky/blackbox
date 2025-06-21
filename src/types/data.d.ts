@@ -1,4 +1,4 @@
-import type { ValueData } from '@/utils'
+import type { ValueData } from '@/utils/derivative'
 
 export interface LocationData {
   lat: number
