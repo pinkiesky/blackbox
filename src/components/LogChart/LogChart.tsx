@@ -17,13 +17,13 @@ const LogChart: FC<Props> = ({ onSelect }) => {
   const { log } = useLogStore()
 
   const lineRef = useRef<any>(null)
-  const [altitudeM, setAltitudeM] = useState<string[]>([])
+  const [altitudeM, setAltitudeM] = useState<number[]>([])
   const [dates, setDates] = useState<string[]>([])
 
   useEffect(() => {
     if (!log) return
 
-    const altitudeMData = log.records.map((log) => `${log.altitudeM}m`)
+    const altitudeMData = log.records.map((log) => log.altitudeM)
     const dates = log.records.map((log) => format(log.date, 'HH:mm:ss'))
 
     setAltitudeM(altitudeMData)

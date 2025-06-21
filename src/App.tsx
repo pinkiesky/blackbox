@@ -130,7 +130,7 @@ function App() {
 
       {log && stats && (
         <Container sx={styles.app} maxWidth="xl">
-          <Grid container spacing={2} alignItems="center">
+          <Grid container spacing={1} alignItems="center">
             <Grid>
               <Typography sx={styles.title}>
                 {log.title || 'Unknown Log'}
