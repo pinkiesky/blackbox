@@ -1,17 +1,23 @@
 import { type FC, useEffect, useRef, useState } from 'react'
 import { format } from 'date-fns'
 import { Line } from 'react-chartjs-2'
-import { Box } from '@mui/material'
+import { Box, styled } from '@mui/material'
 import { useLogStore } from '@/store/log.ts'
 import {
   type DraggableSelectEvent,
   getDraggableSelectRangeConfig,
 } from '@/utils/chart'
 import type { ScriptableContext } from 'chart.js'
+import LogChartSettings from '@/components/LogChartSettings/LogChartSettings.tsx'
 
 interface Props {
   onSelect: (event: DraggableSelectEvent) => void
 }
+
+const StyledBox = styled(Box)({
+  position: 'relative',
+  minHeight: '322px',
+})
 
 const LogChart: FC<Props> = ({ onSelect }) => {
   const { log } = useLogStore()
@@ -45,11 +51,10 @@ const LogChart: FC<Props> = ({ onSelect }) => {
   }
 
   return (
-    <Box>
+    <StyledBox>
       <Line
         ref={lineRef}
-        width={1280}
-        height={700}
+        height="65%"
         options={{
           responsive: true,
           plugins: {
@@ -74,7 +79,9 @@ const LogChart: FC<Props> = ({ onSelect }) => {
           ],
         }}
       />
-    </Box>
+
+      <LogChartSettings />
+    </StyledBox>
   )
 }
 

@@ -1,11 +1,15 @@
-import { type ChangeEvent, useEffect, useMemo, useState } from 'react'
-import { Box, Button, type SxProps, Typography } from '@mui/material'
+import { type ChangeEvent, useEffect, useMemo } from 'react'
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  IconButton,
+  Typography,
+} from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import HighlightOff from '@mui/icons-material/HighlightOff'
 import { useLocalStorage } from '@uidotdev/usehooks'
-import VisuallyHiddenInput from '@/components/ui/VisuallyHiddenInput.tsx'
-import MapControls from '@/components/MapControls/MapControls.tsx'
-import Map from '@/components/Map/Map.tsx'
-import LogChart from '@/components/LogChart/LogChart.tsx'
 import { useLogStore } from '@/store/log.ts'
 import type { DraggableSelectEvent } from '@/utils/chart'
 import { resampleData } from './parse/resampler/resampler'
@@ -14,37 +18,14 @@ import type { Log, LogStatistics } from './parse/types'
 import { ValueStatCalculator } from './math/ValueStatCalculator'
 import { DistanceCalculator } from './math/DistanceCalculator'
 import { DerivativeCalculator } from './math/DerivativeCalculator'
-
-const styles: Record<string, SxProps> = {
-  app: {
-    padding: '2rem',
-  },
-  map: {
-    display: 'flex',
-    gap: '24px',
-    maxWidth: '1280px',
-    paddingTop: '2rem',
-    margin: '0 auto',
-    textAlign: 'center',
-  },
-  mapInfo: {
-    minWidth: '300px',
-  },
-  mapTitle: {
-    marginBottom: '12px',
-    textAlign: 'left',
-    fontSize: '20px',
-  },
-  chart: {
-    marginTop: '24px',
-  },
-}
+import VisuallyHiddenInput from '@/components/ui/VisuallyHiddenInput.tsx'
+import Map from '@/components/Map/Map.tsx'
+import LogChart from '@/components/LogChart/LogChart.tsx'
+import Stats from '@/components/Stats/Stats.tsx'
 
 function App() {
   const [data, saveData] = useLocalStorage<string | null>('RawData2', null)
-  const { setLog } = useLogStore()
-
-  const [rawLog, setRawLog] = useState<Log | null>(null)
+  const { setLog, rawLog, setRawLog } = useLogStore()
 
   useEffect(() => {
     if (!data) {
@@ -171,7 +152,7 @@ function App() {
   return (
     <>
       {!log && (
-        <Box sx={styles.app}>
+        <Box>
           <h1>Blackbox</h1>
 
           <Button
@@ -193,22 +174,36 @@ function App() {
       )}
 
       {log && globalLogStatistic && (
-        <>
-          <Box sx={styles.map}>
-            <Box sx={styles.mapInfo}>
-              <Typography sx={styles.mapTitle}>
+        <Container maxWidth="xl">
+          <Grid container spacing={1} alignItems="center" sx={{ mb: 2 }}>
+            <Grid>
+              <Typography fontSize={24}>
                 {log.title || 'Unknown Log'}
               </Typography>
-
-              <MapControls clear={clearData} />
-            </Box>
-
-            <Map stat={globalLogStatistic!} />
-          </Box>
-          <Box sx={styles.chart}>
-            <LogChart onSelect={onRangeSelect} />
-          </Box>
-        </>
+            </Grid>
+            <Grid>
+              <IconButton
+                aria-label="clear"
+                color="error"
+                size="small"
+                onClick={clearData}
+              >
+                <HighlightOff />
+              </IconButton>
+            </Grid>
+          </Grid>
+          <Grid spacing={3}>
+            <Grid sx={{ mt: 1 }}>
+              <Grid container minHeight={500} spacing={1}>
+                <Map stat={globalLogStatistic} />
+                <Stats stat={globalLogStatistic} />
+              </Grid>
+            </Grid>
+            <Grid sx={{ mt: 3 }}>
+              <LogChart onSelect={onRangeSelect} />
+            </Grid>
+          </Grid>
+        </Container>
       )}
     </>
   )
