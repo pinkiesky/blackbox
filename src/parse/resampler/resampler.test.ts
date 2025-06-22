@@ -199,6 +199,9 @@ describe('resampleData', () => {
     rollRad: 0,
     pitchRad: 0,
     yawRad: 0,
+    recieverLinkQuality: 0,
+    recieverSSIdB: 0,
+    transmitterSSIdB: 0,
   })
 
   it('should return empty array for empty input', () => {

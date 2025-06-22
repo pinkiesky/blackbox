@@ -95,13 +95,14 @@ const Map: FC<Props> = ({ stat }) => {
 
   const lchCb = useCallback(
     (opts: GetSegmentConfigOptions): Segment['config'] => {
-      const avgSegmentAltitudeM =
-        opts.usedRecords.reduce((acc, record) => acc + record.altitudeM, 0) /
-        opts.usedRecords.length
+      const avgSegment =
+        opts.usedRecords.reduce((acc, record) => {
+          return record.altitudeM + acc
+        }, 0) / opts.usedRecords.length
       const color = interpolateHsl(
         'green',
         'red',
-      )(avgSegmentAltitudeM / stat.altitude.max)
+      )(avgSegment / stat.altitude.max)
       return {
         opacity: 0.7,
         color,

@@ -209,6 +209,21 @@ export function resampleData(
         secondRecord.yawRad,
         fraction,
       ),
+      recieverLinkQuality: linearInterpolate(
+        firstRecord.recieverLinkQuality,
+        secondRecord.recieverLinkQuality,
+        fraction,
+      ),
+      recieverSSIdB: linearInterpolate(
+        firstRecord.recieverSSIdB,
+        secondRecord.recieverSSIdB,
+        fraction,
+      ),
+      transmitterSSIdB: linearInterpolate(
+        firstRecord.transmitterSSIdB,
+        secondRecord.transmitterSSIdB,
+        fraction,
+      ),
       $resample: {
         deviationSec: minDeviationSec,
         interpolated: true,

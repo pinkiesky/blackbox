@@ -96,12 +96,15 @@ export interface LogRecord {
   groundSpeedKmh: number
   headingDeg: number
   transmitterLinkQuality: number
-  transmitterPowerMw: number // in milliwatts
+  recieverLinkQuality: number
+  transmitterPowerMw: number
   amperageCurrentA: number
   verticalSpeedMps: number
   rollRad: number
   pitchRad: number
   yawRad: number
+  recieverSSIdB: number
+  transmitterSSIdB: number
 
   $resample?: {
     deviationSec?: number // deviation from the original record in seconds

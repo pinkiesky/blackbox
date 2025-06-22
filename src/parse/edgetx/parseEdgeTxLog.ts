@@ -28,6 +28,7 @@ export async function parseEdgeTxLogs(text: string): Promise<Log> {
     const [lat, lng] = record.GPS.split(' ').map(safeParseNumber)
     const coordinates = { lat, lng, alt: safeParseNumber(record['Alt(m)']) }
 
+    const antennaIndex = Number(record['ANT']) || 0
     const data = {
       flightTimeSec: (parsedDate.getTime() - startDate.getTime()) / 1000,
       coordinates,
@@ -42,6 +43,11 @@ export async function parseEdgeTxLogs(text: string): Promise<Log> {
       rollRad: safeParseNumber(record['Roll(rad)']),
       pitchRad: safeParseNumber(record['Ptch(rad)']),
       yawRad: safeParseNumber(record['Yaw(rad)']),
+      recieverLinkQuality: safeParseNumber(record['RQly(%)']),
+      recieverSSIdB: safeParseNumber(
+        antennaIndex === 0 ? record['1RSS(dB)'] : record['2RSS(dB)'],
+      ),
+      transmitterSSIdB: safeParseNumber(record['TRSS(dB)']),
     }
 
     return data

@@ -1,10 +1,10 @@
 import { useMemo, type FC } from 'react'
-import { type PathOptions } from 'leaflet'
-import { Polyline, Popup, Marker } from 'react-leaflet'
+import { type LatLngLiteral, type PathOptions } from 'leaflet'
+import { Polyline, Popup } from 'react-leaflet'
 import type { Arrow, LocationData, Segment } from '@/types/data'
-import { createRotatedArrowIcon } from '../icons/ArrowIcon'
 import { getDistanceBetweenPoints } from '@/utils'
 import type { Log, LogRecord } from '@/parse/types'
+import { interpolateHsl } from 'd3-interpolate'
 
 // Types
 export interface GetSegmentConfigOptions {
@@ -33,6 +33,40 @@ const DEFAULT_PATH_OPTIONS: PathOptions = {
   weight: 4,
   opacity: 1,
   stroke: true,
+  lineJoin: 'miter',
+  lineCap: 'butt',
+}
+
+export function createTrianglePolyline(arrow: Arrow): LatLngLiteral[] {
+  const { position, bearingDeg } = arrow
+  const delta = 0.00005
+
+  // Convert bearing to radians
+  const bearingRad = (bearingDeg * Math.PI) / 180
+
+  // Calculate the three triangle vertices
+  // Tip of the triangle (pointing in the direction of bearing)
+  const tip: LatLngLiteral = {
+    lat: position.lat + delta * Math.cos(bearingRad),
+    lng: position.lng + delta * Math.sin(bearingRad),
+  }
+
+  // Left base vertex (120 degrees counter-clockwise from bearing)
+  const leftBaseAngle = bearingRad + (2 * Math.PI) / 3
+  const leftBase: LatLngLiteral = {
+    lat: position.lat + delta * 0.6 * Math.cos(leftBaseAngle),
+    lng: position.lng + delta * 0.6 * Math.sin(leftBaseAngle),
+  }
+
+  // Right base vertex (120 degrees clockwise from bearing)
+  const rightBaseAngle = bearingRad - (2 * Math.PI) / 3
+  const rightBase: LatLngLiteral = {
+    lat: position.lat + delta * 0.6 * Math.cos(rightBaseAngle),
+    lng: position.lng + delta * 0.6 * Math.sin(rightBaseAngle),
+  }
+
+  // Return triangle polyline (closed shape)
+  return [tip, leftBase, rightBase, tip]
 }
 
 const MAX_SEGMENT_DISTANCE_M = 100
@@ -128,7 +162,24 @@ const MapLogPathRenderer: FC<Props> = ({ log, getConfig }) => {
             positions={segment.points}
             pathOptions={{
               ...DEFAULT_PATH_OPTIONS,
-              opacity: segment.config.opacity ?? DEFAULT_PATH_OPTIONS.opacity,
+              opacity: 0.3,
+              color: 'black',
+              weight:
+                (segment.config.weight ?? DEFAULT_PATH_OPTIONS.weight!) + 3,
+            }}
+          >
+            {segment.config.popoverText && (
+              <Popup>
+                <div>{segment.config.popoverText}</div>
+              </Popup>
+            )}
+          </Polyline>
+
+          <Polyline
+            positions={segment.points}
+            pathOptions={{
+              ...DEFAULT_PATH_OPTIONS,
+              opacity: 1,
               color: segment.config.color ?? DEFAULT_PATH_OPTIONS.color,
               weight: segment.config.weight ?? DEFAULT_PATH_OPTIONS.weight,
             }}
@@ -140,16 +191,27 @@ const MapLogPathRenderer: FC<Props> = ({ log, getConfig }) => {
             )}
           </Polyline>
 
-          {segment.arrows.map((arrow, arrowIndex) => (
-            <Marker
-              key={`arrow-${index}-${arrowIndex}`}
-              position={arrow.position}
-              icon={createRotatedArrowIcon(
-                arrow.bearingDeg,
-                segment.config.color,
-              )}
-            />
-          ))}
+          {segment.arrows.map((arrow, arrowIndex) => {
+            const points = createTrianglePolyline(arrow)
+            const color = interpolateHsl(
+              segment.config.color ?? DEFAULT_PATH_OPTIONS.color!,
+              'black',
+            )(0.5)
+            return (
+              <Polyline
+                key={arrowIndex}
+                positions={points}
+                pathOptions={{
+                  ...DEFAULT_PATH_OPTIONS,
+                  color: color,
+                  weight: 1,
+                  fill: true,
+                  stroke: false,
+                  fillOpacity: 0.9,
+                }}
+              />
+            )
+          })}
         </div>
       ))}
     </>
