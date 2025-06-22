@@ -4,6 +4,7 @@ import { Polyline, Popup, Marker } from 'react-leaflet'
 import type { Arrow, LocationData, Segment } from '@/types/data'
 import { createRotatedArrowIcon } from '../icons/ArrowIcon'
 import { getDistanceBetweenPoints } from '@/utils'
+import { useLogStore } from '@/store/log.ts'
 import type { Log, LogRecord } from '@/parse/types'
 
 // Types
@@ -23,7 +24,6 @@ interface PathArrowSegment {
 }
 
 interface Props {
-  log: Log
   getConfig: GetSegmentConfig
 }
 
@@ -38,7 +38,9 @@ const DEFAULT_PATH_OPTIONS: PathOptions = {
 const MAX_SEGMENT_DISTANCE_M = 100
 const MAX_ARROW_DISTANCE_M = 75
 
-const MapLogPathRenderer: FC<Props> = ({ log, getConfig }) => {
+const MapLogPathRenderer: FC<Props> = ({ getConfig }) => {
+  const { log } = useLogStore()
+
   const segments: PathArrowSegment[] = useMemo(() => {
     if (!log?.records?.length) return []
 
@@ -69,6 +71,7 @@ const MapLogPathRenderer: FC<Props> = ({ log, getConfig }) => {
       usedRecords = []
       segmentDistance = 0
       arrowDistance = 0
+      lastArrowPosition = null
     }
 
     const addArrow = (record: LogRecord) => {

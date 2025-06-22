@@ -194,7 +194,7 @@ const Map: FC<Props> = ({ stat }) => {
               </Marker>
             )}
 
-            <MapLogPathRenderer log={log!} getConfig={lchCb} />
+            <MapLogPathRenderer getConfig={lchCb} />
           </MapContainer>
         </Box>
       )}
