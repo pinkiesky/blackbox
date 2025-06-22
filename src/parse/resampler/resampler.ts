@@ -1,4 +1,4 @@
-import type { LogRecord } from '@/types/data'
+import type { LogRecord } from '../types'
 
 export function linearInterpolate(
   start: number,
@@ -149,6 +149,11 @@ export function resampleData(
         lng: linearInterpolate(
           firstRecord.coordinates.lng,
           secondRecord.coordinates.lng,
+          fraction,
+        ),
+        alt: linearInterpolate(
+          firstRecord.coordinates.alt,
+          secondRecord.coordinates.alt,
           fraction,
         ),
       },

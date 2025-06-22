@@ -1,5 +1,5 @@
+import type { Log } from '@/parse/types'
 import { create } from 'zustand'
-import type { Log } from '@/types/data'
 
 interface LogState {
   log: Log | null

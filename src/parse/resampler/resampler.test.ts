@@ -5,7 +5,7 @@ import {
   circularInterpolate,
   circularInterpolateRadians,
 } from './resampler'
-import type { LogRecord } from '@/types/data'
+import type { LogRecord } from '../types'
 
 describe('linearInterpolate', () => {
   it('should interpolate correctly between two values', () => {
@@ -187,7 +187,7 @@ describe('resampleData', () => {
     baseDate: Date = new Date('2000-01-01T00:00:00.000Z'),
   ): LogRecord => ({
     flightTimeSec,
-    coordinates: { lat, lng },
+    coordinates: { lat, lng, alt: altitudeM },
     altitudeM,
     date: new Date(baseDate.getTime() + flightTimeSec * 1000),
     groundSpeedKmh,

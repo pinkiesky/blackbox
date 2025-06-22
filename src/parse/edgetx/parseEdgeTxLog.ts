@@ -1,15 +1,15 @@
-import type { Log, LogRecord, RadiomasterLogRecord } from '@/types/data'
-import { parseCsv } from '.'
-import { safeParseNumber } from '../derivative'
+import { safeParseNumber } from '@/utils'
+import { parseCsv } from '../parceCsv'
+import type { Log, LogRecord, RadiomasterLogRecord } from '../types'
 
-export async function parseRadiomasterLogs(text: string): Promise<Log> {
+export async function parseEdgeTxLogs(text: string): Promise<Log> {
   const data = (await parseCsv(text)) as RadiomasterLogRecord[]
   if (!Array.isArray(data) || data.length === 0) {
     throw new Error('No valid records found in the log.')
   }
 
-  let startTime: Date | null = null
-  let endTime: Date | null = null
+  let startDate: Date | null = null
+  let endDate: Date | null = null
 
   const records = data.map((record): LogRecord => {
     const parsedDate = new Date(`${record.Date}T${record.Time}Z`)
@@ -17,19 +17,19 @@ export async function parseRadiomasterLogs(text: string): Promise<Log> {
       throw new Error(`Invalid date format: ${record.Date} ${record.Time}`)
     }
 
-    if (!startTime) {
-      startTime = parsedDate
+    if (!startDate) {
+      startDate = parsedDate
     }
 
-    if (!endTime || parsedDate > endTime) {
-      endTime = parsedDate
+    if (!endDate || parsedDate > endDate) {
+      endDate = parsedDate
     }
 
     const [lat, lng] = record.GPS.split(' ').map(safeParseNumber)
-    const coordinates = { lat, lng }
+    const coordinates = { lat, lng, alt: safeParseNumber(record['Alt(m)']) }
 
     const data = {
-      flightTimeSec: (parsedDate.getTime() - startTime.getTime()) / 1000,
+      flightTimeSec: (parsedDate.getTime() - startDate.getTime()) / 1000,
       coordinates,
       altitudeM: safeParseNumber(record['Alt(m)']),
       date: parsedDate,
@@ -47,14 +47,13 @@ export async function parseRadiomasterLogs(text: string): Promise<Log> {
     return data
   })
 
-  const durationSec = (endTime!.getTime() - startTime!.getTime()) / 1000
+  const durationSec = (endDate!.getTime() - startDate!.getTime()) / 1000
 
-  // TODO move statistics calculation to a separate function
   return {
     records,
-    startTime: startTime!,
-    endTime: endTime!,
+    startDate: startDate!,
+    endDate: endDate!,
     durationSec,
-    title: `Radiomaster Log from ${startTime!.toLocaleString()} to ${endTime!.toLocaleString()}`,
+    title: `EdgeTX Log from ${startDate!.toLocaleString()}`,
   }
 }
