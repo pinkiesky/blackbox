@@ -1,4 +1,4 @@
-import type { RadiomasterLogRecord } from '@/types/data'
+import type { RadiomasterLogRecord } from '@/parse/types'
 
 export enum FiltersType {
   ALTITUDE,

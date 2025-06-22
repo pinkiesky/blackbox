@@ -1,5 +1,5 @@
 import { describe, expect, test, beforeEach } from 'vitest'
-import { DerivativeCalculator } from './index'
+import { DerivativeCalculator } from './DerivativeCalculator'
 
 describe('DerivativeCalculator', () => {
   let calculator: DerivativeCalculator

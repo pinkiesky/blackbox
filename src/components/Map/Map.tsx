@@ -11,7 +11,7 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import type { CSSProperties } from '@mui/material'
 import 'leaflet-providers'
 import { interpolateHsl } from 'd3-interpolate'
-import type { LogStatistics, Segment } from '@/types/data'
+import type { Segment } from '@/types/data'
 import { useLogStore } from '@/store/log.ts'
 import { useMapPositions } from '@/hooks/useMapPositions'
 import { StartIcon } from '@/components/icons/StartIcon'
@@ -19,6 +19,7 @@ import { FinishIcon } from '@/components/icons/FinishIcon'
 import MapLogPathRenderer, {
   type GetSegmentConfigOptions,
 } from '../MapPolylines/MapLogPathRenderer'
+import type { LogStatistics } from '@/parse/types'
 
 interface Props {
   stat: LogStatistics

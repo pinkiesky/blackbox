@@ -1,4 +1,4 @@
-import type { LogRecord } from '@/types/data'
+import type { LogRecord } from '../types'
 
 export function linearInterpolate(
   start: number,

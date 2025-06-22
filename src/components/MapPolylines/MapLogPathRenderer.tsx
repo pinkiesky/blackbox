@@ -1,9 +1,10 @@
 import { useMemo, type FC } from 'react'
 import { type PathOptions } from 'leaflet'
 import { Polyline, Popup, Marker } from 'react-leaflet'
-import type { Arrow, LocationData, Log, LogRecord, Segment } from '@/types/data'
+import type { Arrow, LocationData, Segment } from '@/types/data'
 import { createRotatedArrowIcon } from '../icons/ArrowIcon'
 import { getDistanceBetweenPoints } from '@/utils'
+import type { Log, LogRecord } from '@/parse/types'
 
 // Types
 export interface GetSegmentConfigOptions {

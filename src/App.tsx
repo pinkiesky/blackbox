@@ -2,20 +2,18 @@ import { type ChangeEvent, useEffect, useMemo, useState } from 'react'
 import { Box, Button, type SxProps, Typography } from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { useLocalStorage } from '@uidotdev/usehooks'
-import type { Log, LogStatistics } from '@/types/data'
 import VisuallyHiddenInput from '@/components/ui/VisuallyHiddenInput.tsx'
 import MapControls from '@/components/MapControls/MapControls.tsx'
 import Map from '@/components/Map/Map.tsx'
-import { parseRadiomasterLogs } from './utils/parse/parseRadiomasterLog'
-import { resampleData } from './utils/parse/resampler'
-import {
-  DerivativeCalculator,
-  DistanceCalculator,
-  ValueCalculator,
-} from './utils'
 import LogChart from '@/components/LogChart/LogChart.tsx'
 import { useLogStore } from '@/store/log.ts'
 import type { DraggableSelectEvent } from '@/utils/chart'
+import { resampleData } from './parse/resampler/resampler'
+import { parseEdgeTxLogs } from './parse/edgetx/parseEdgeTxLog'
+import type { Log, LogStatistics } from './parse/types'
+import { ValueStatCalculator } from './math/ValueStatCalculator'
+import { DistanceCalculator } from './math/DistanceCalculator'
+import { DerivativeCalculator } from './math/DerivativeCalculator'
 
 const styles: Record<string, SxProps> = {
   app: {
@@ -90,10 +88,10 @@ function App() {
       return null
     }
 
-    const altitudeCalculator = new ValueCalculator()
-    const speedCalculator = new ValueCalculator()
-    const transmitterPowerCalculator = new ValueCalculator()
-    const transmitterQualityCalculator = new ValueCalculator()
+    const altitudeCalculator = new ValueStatCalculator()
+    const speedCalculator = new ValueStatCalculator()
+    const transmitterPowerCalculator = new ValueStatCalculator()
+    const transmitterQualityCalculator = new ValueStatCalculator()
     const distanceCalculator = new DistanceCalculator()
     const rollDerivativeCalculator = new DerivativeCalculator()
 
@@ -151,7 +149,7 @@ function App() {
 
   const parseRawData = async (rawData: string): Promise<Log> => {
     console.log('Parsing raw data...', rawData.length, 'characters')
-    return await parseRadiomasterLogs(rawData)
+    return await parseEdgeTxLogs(rawData)
   }
 
   const onRangeSelect = ({ range }: DraggableSelectEvent) => {
