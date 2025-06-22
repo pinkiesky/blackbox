@@ -266,3 +266,22 @@ export class DerivativeCalculator {
     this.totalDerivative = 0
   }
 }
+
+export function getDistanceBetweenPoints(
+  coordinates: LocationData,
+  coordinates1: LocationData,
+) {
+  const dist = new LatLng(coordinates.lat, coordinates.lng).distanceTo(
+    new LatLng(coordinates1.lat, coordinates1.lng),
+  )
+
+  if (
+    typeof coordinates.alt === 'number' &&
+    typeof coordinates1.alt === 'number'
+  ) {
+    const altitudeDiff = coordinates.alt - coordinates1.alt
+    return Math.sqrt(dist ** 2 + altitudeDiff ** 2)
+  }
+
+  return dist
+}

@@ -151,6 +151,11 @@ export function resampleData(
           secondRecord.coordinates.lng,
           fraction,
         ),
+        alt: linearInterpolate(
+          firstRecord.coordinates.alt,
+          secondRecord.coordinates.alt,
+          fraction,
+        ),
       },
       altitudeM: linearInterpolate(
         firstRecord.altitudeM,
