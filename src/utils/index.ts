@@ -1,5 +1,5 @@
-import type { LocationData } from '@/types/data'
 import { LatLng } from 'leaflet'
+import type { LocationData } from '@/types/data'
 
 export function safeParseNumber(value: string | number): number {
   if (typeof value === 'string' && value.trim() === '') {

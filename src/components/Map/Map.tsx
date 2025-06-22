@@ -1,9 +1,20 @@
 import { type FC, useEffect, useState, type MouseEvent } from 'react'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
-import { IconButton, Menu, MenuItem, ListItemText, Box } from '@mui/material'
+import {
+  IconButton,
+  Menu,
+  MenuItem,
+  ListItemText,
+  Box,
+  Divider,
+  FormControlLabel,
+  Checkbox,
+  styled,
+} from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import type { CSSProperties } from '@mui/material'
 import 'leaflet-providers'
+import { type MapProvider, mapProviders } from '@/utils/providers.ts'
 import { useLogStore } from '@/store/log.ts'
 import { useMapPositions } from '@/hooks/useMapPositions'
 import { StartIcon } from '@/components/icons/StartIcon'
@@ -16,65 +27,29 @@ interface Props {
   segmentDataCallback: GetSegmentConfig
 }
 
-interface MapProvider {
-  name: string
-  url: string
-  attribution: string
-}
-
-const mapProviders: MapProvider[] = [
-  {
-    name: 'Satellite (Esri)',
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
-  },
-  {
-    name: 'OpenStreetMap',
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  },
-  {
-    name: 'CartoDB Positron',
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-  },
-  {
-    name: 'CartoDB Dark Matter',
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-  },
-  {
-    name: 'Stamen Terrain',
-    url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png',
-    attribution:
-      'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  },
-]
-
 const styles: Record<string, CSSProperties> = {
   map: {
     width: '100%',
     height: '100%',
-    minWidth: '1000px',
-    minHeight: '900px',
+    minWidth: '1200px', // Minimum width to prevent width 0
+    minHeight: '500px',
     borderRadius: '4px',
-  },
-  settingsContainer: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 1000,
-    backgroundColor: 'white',
-    borderRadius: '4px',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-  },
-  mapContainer: {
-    position: 'relative',
   },
 }
+
+const StyledSettingsContainer = styled(Box)({
+  position: 'absolute',
+  top: 10,
+  right: 10,
+  zIndex: 1000,
+  backgroundColor: 'white',
+  borderRadius: '4px',
+  boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+})
+
+const StyledContainer = styled(Box)({
+  position: 'relative',
+})
 
 const Map: FC<Props> = ({ segmentDataCallback }) => {
   const { log } = useLogStore()
@@ -117,8 +92,8 @@ const Map: FC<Props> = ({ segmentDataCallback }) => {
   return (
     <>
       {centerPosition && (
-        <Box style={styles.mapContainer}>
-          <Box style={styles.settingsContainer}>
+        <StyledContainer>
+          <StyledSettingsContainer>
             <IconButton
               onClick={handleSettingsClick}
               size="small"
@@ -148,8 +123,36 @@ const Map: FC<Props> = ({ segmentDataCallback }) => {
                   <ListItemText primary={provider.name} />
                 </MenuItem>
               ))}
+              <Divider />
+              <MenuItem>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={true}
+                      name="altitude"
+                      size="small"
+                      sx={{ padding: '6px' }}
+                    />
+                  }
+                  label="Altitude"
+                />
+              </MenuItem>
+              <MenuItem>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={true}
+                      name="battery"
+                      size="small"
+                      sx={{ padding: '6px' }}
+                    />
+                  }
+                  label="Battery"
+                />
+              </MenuItem>
             </Menu>
-          </Box>
+          </StyledSettingsContainer>
+
           <MapContainer center={centerPosition} zoom={16} style={styles.map}>
             <TileLayer
               key={selectedProvider.name}
@@ -168,9 +171,9 @@ const Map: FC<Props> = ({ segmentDataCallback }) => {
               </Marker>
             )}
 
-            <MapLogPathRenderer log={log!} getConfig={segmentDataCallback} />
+            <MapLogPathRenderer getConfig={segmentDataCallback} />
           </MapContainer>
-        </Box>
+        </StyledContainer>
       )}
     </>
   )
