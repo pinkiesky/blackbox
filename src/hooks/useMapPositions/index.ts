@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import type {
   LocationData,
   Log,
@@ -6,7 +6,6 @@ import type {
   LogStatistics,
   Segment,
 } from '@/types/data'
-import { compareObjectsRecursively } from '@/utils'
 
 interface UseMapPositionsReturn {
   /* States */
@@ -14,7 +13,6 @@ interface UseMapPositionsReturn {
   centerPosition: LocationData | null
   startPosition: LocationData | null
   finishPosition: LocationData | null
-  segments: Segment[]
 
   /* Methods */
   initCenterPosition: () => void
@@ -28,11 +26,7 @@ export type LineConfigHandler = (
   stat: LogStatistics,
 ) => Segment['config']
 
-export function useMapPositions(
-  log: Log | null,
-  stat: LogStatistics,
-  lch: LineConfigHandler,
-): UseMapPositionsReturn {
+export function useMapPositions(log: Log | null): UseMapPositionsReturn {
   const [centerPosition, setCenterPosition] = useState<LocationData | null>(
     null,
   )
@@ -42,47 +36,13 @@ export function useMapPositions(
   )
   const [path, setPath] = useState<LocationData[]>([])
 
-  const segments: Segment[] = useMemo(() => {
-    if (!log) return []
-
-    const segments: Segment[] = []
-
-    let currentSegment: Segment | null = null
-    for (let i = 0; i < log.records.length; i++) {
-      const record = log.records[i]
-
-      const recordConfig = lch(record, stat)
-
-      if (!currentSegment) {
-        currentSegment = {
-          points: [record.coordinates],
-          config: recordConfig,
-        }
-
-        continue
-      }
-
-      currentSegment.points.push(record.coordinates)
-      if (!compareObjectsRecursively(currentSegment.config, recordConfig)) {
-        segments.push(currentSegment)
-        i--
-        currentSegment = null
-      }
-    }
-
-    if (currentSegment) {
-      segments.push(currentSegment)
-    }
-
-    return segments
-  }, [lch, log])
-
   const initCenterPosition = () => {
     if (!log || log.records.length === 0) return
 
     setCenterPosition({
       lat: log.records[0].coordinates.lat,
       lng: log.records[0].coordinates.lng,
+      alt: log.records[0].coordinates.alt,
     })
   }
 
@@ -108,7 +68,7 @@ export function useMapPositions(
     if (!log) return
 
     const gps = log.records[log.records.length - 1].coordinates
-    setFinishPosition({ lat: gps.lat, lng: gps.lng })
+    setFinishPosition({ lat: gps.lat, lng: gps.lng, alt: gps.alt })
   }
 
   return {
@@ -117,7 +77,6 @@ export function useMapPositions(
     centerPosition,
     startPosition,
     finishPosition,
-    segments,
 
     /* Methods */
     initCenterPosition,

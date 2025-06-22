@@ -3,6 +3,7 @@ import type { ValueData } from '@/utils'
 export interface LocationData {
   lat: number
   lng: number
+  alt: number // optional altitude
 }
 
 export interface Segment {
@@ -11,6 +12,7 @@ export interface Segment {
     opacity?: number
     color?: string
     popoverText?: string // text to show in the popover
+    weight?: number // line width
   }
 }
 
