@@ -1,3 +1,5 @@
+import type { ChartSettings } from '@/store/chart-settings.ts'
+
 export interface DraggableSelectEvent {
   range: [string, string]
 }
@@ -22,4 +24,9 @@ export const getDraggableSelectRangeConfig = (
     },
   },
   onSelect: options.onSelect,
+})
+
+export const getDefaultChartSettings = (): ChartSettings => ({
+  altitudeM: true,
+  groundSpeedKmh: false,
 })

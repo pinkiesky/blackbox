@@ -8,6 +8,7 @@ import {
   getDraggableSelectRangeConfig,
 } from '@/utils/chart'
 import type { ScriptableContext } from 'chart.js'
+import LogChartSettings from '@/components/LogChartSettings/LogChartSettings.tsx'
 
 interface Props {
   onSelect: (event: DraggableSelectEvent) => void
@@ -45,7 +46,7 @@ const LogChart: FC<Props> = ({ onSelect }) => {
   }
 
   return (
-    <Box>
+    <Box sx={{ position: 'relative' }}>
       <Line
         ref={lineRef}
         height="65%"
@@ -73,6 +74,8 @@ const LogChart: FC<Props> = ({ onSelect }) => {
           ],
         }}
       />
+
+      <LogChartSettings />
     </Box>
   )
 }

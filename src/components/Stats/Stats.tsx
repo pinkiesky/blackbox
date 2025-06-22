@@ -7,7 +7,6 @@ import {
   ListItemText,
   Typography,
   Chip,
-  Grid,
 } from '@mui/material'
 import HeightIcon from '@mui/icons-material/Height'
 import AirplaneIcon from '@mui/icons-material/AirplanemodeActive'
@@ -17,6 +16,13 @@ import type { LogStatistics } from '@/parse/types'
 
 interface Props {
   stat: LogStatistics
+}
+
+const styles = {
+  chip: {
+    marginTop: '0.2rem',
+    marginRight: '0.4rem',
+  },
 }
 
 const Stats: FC<Props> = ({ stat }) => {
@@ -55,7 +61,7 @@ const Stats: FC<Props> = ({ stat }) => {
       {stat && (
         <List disablePadding>
           {list.map((item, idx) => (
-            <ListItem sx={{ paddingTop: idx === 0 ? '0' : '0.2rem' }}>
+            <ListItem sx={{ paddingTop: idx === 0 ? '0' : '0.2rem' }} key={idx}>
               <ListItemAvatar>
                 <Avatar sx={{ backgroundColor: '#4c4848' }}>{item.icon}</Avatar>
               </ListItemAvatar>
@@ -70,18 +76,19 @@ const Stats: FC<Props> = ({ stat }) => {
                     <Typography color="white">{item.text}</Typography>
                   ) : (
                     <>
-                      <Grid container spacing={1} marginTop={0.5}>
-                        <Chip
-                          label={`min: ${item.min}`}
-                          color="primary"
-                          size="small"
-                        />
-                        <Chip
-                          label={`max: ${item.max}`}
-                          color="error"
-                          size="small"
-                        />
-                      </Grid>
+                      <Chip
+                        component="span"
+                        label={`min: ${item.min}`}
+                        sx={styles.chip}
+                        color="primary"
+                        size="small"
+                      />
+                      <Chip
+                        component="span"
+                        label={`max: ${item.max}`}
+                        color="error"
+                        size="small"
+                      />
                     </>
                   )
                 }

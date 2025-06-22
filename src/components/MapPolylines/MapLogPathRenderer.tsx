@@ -41,87 +41,74 @@ const MAX_ARROW_DISTANCE_M = 75
 const MapLogPathRenderer: FC<Props> = ({ getConfig }) => {
   const { log } = useLogStore()
 
-  const segments: PathArrowSegment[] = useMemo(() => {
+  const segments = useMemo(() => {
     if (!log?.records?.length) return []
 
-    const segments: PathArrowSegment[] = []
-    let currentPoints: LocationData[] = []
-    let currentArrows: Arrow[] = []
-    let usedRecords: LogRecord[] = []
+    const res: PathArrowSegment[] = []
+    let points: LocationData[] = []
+    let arrows: Arrow[] = []
     let segmentDistance = 0
     let arrowDistance = 0
-    let lastArrowPosition: LocationData | null = null
+    let lastArrowPos: LocationData | null = null
 
-    const finalizeSegment = () => {
-      if (currentPoints.length > 0 && usedRecords.length > 0) {
-        segments.push({
-          points: [...currentPoints],
-          arrows: [...currentArrows],
-          config: getConfig({
-            log,
-            usedRecords: [...usedRecords],
-            fromSec: usedRecords[0].flightTimeSec,
-            toSec: usedRecords[usedRecords.length - 1].flightTimeSec,
-          }),
-        })
-      }
-
-      currentPoints = []
-      currentArrows = []
-      usedRecords = []
+    const flush = (used: LogRecord[]) => {
+      if (!points.length) return
+      res.push({
+        points,
+        arrows,
+        config: getConfig({
+          log,
+          usedRecords: used,
+          fromSec: used[0].flightTimeSec,
+          toSec: used[used.length - 1].flightTimeSec,
+        }),
+      })
+      // начинаем новый сегмент
+      points = []
+      arrows = []
       segmentDistance = 0
       arrowDistance = 0
-      lastArrowPosition = null
+      lastArrowPos = null
     }
 
-    const addArrow = (record: LogRecord) => {
-      currentArrows.push({
-        position: record.coordinates,
-        bearingDeg: record.headingDeg,
-      })
-      lastArrowPosition = record.coordinates
-      arrowDistance = 0
-    }
+    let used: LogRecord[] = []
 
     for (let i = 0; i < log.records.length; i++) {
-      const record = log.records[i]
-      const prevRecord = log.records[i - 1]
+      const rec = log.records[i]
+      const prev = log.records[i - 1]
 
-      usedRecords.push(record)
-      currentPoints.push(record.coordinates)
+      points.push(rec.coordinates)
+      used.push(rec)
 
-      // Calculate distance from previous record
-      if (prevRecord) {
-        const distance = getDistanceBetweenPoints(
-          prevRecord.coordinates,
-          record.coordinates,
-        )
-        segmentDistance += distance
-        if (lastArrowPosition) {
+      if (prev) {
+        const d = getDistanceBetweenPoints(prev.coordinates, rec.coordinates)
+        segmentDistance += d
+        if (lastArrowPos) {
           arrowDistance += getDistanceBetweenPoints(
-            lastArrowPosition,
-            record.coordinates,
+            lastArrowPos,
+            rec.coordinates,
           )
         }
       }
 
-      // Add arrow if first point or distance threshold reached
-      if (!lastArrowPosition || arrowDistance >= MAX_ARROW_DISTANCE_M) {
-        addArrow(record)
+      if (!lastArrowPos || arrowDistance >= MAX_ARROW_DISTANCE_M) {
+        arrows.push({ position: rec.coordinates, bearingDeg: rec.headingDeg })
+        lastArrowPos = rec.coordinates
+        arrowDistance = 0
       }
 
-      // Finalize segment if distance threshold reached
       if (segmentDistance >= MAX_SEGMENT_DISTANCE_M) {
-        finalizeSegment()
-        i-- // Process current record again for next segment
+        flush(used)
+        // начинаем новую выборку с ТЕКУЩЕЙ записи,
+        // не трогаем i — счётчик продолжит движение вперёд
+        points.push(rec.coordinates)
+        used = [rec]
       }
     }
 
-    // Add final segment if there are remaining points
-    finalizeSegment()
-
-    return segments
-  }, [log, getConfig])
+    flush(used)
+    return res
+  }, [log?.records, getConfig])
 
   return (
     <>
