@@ -1,5 +1,5 @@
 export interface DraggableSelectEvent {
-  range: [string, string]
+  range: [number, number]
 }
 
 export interface GetDraggableSelectRangeOptions {

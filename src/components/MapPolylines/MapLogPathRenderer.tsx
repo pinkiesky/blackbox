@@ -1,10 +1,11 @@
 import { useMemo, type FC } from 'react'
 import { type LatLngLiteral, type PathOptions } from 'leaflet'
-import { Polyline, Popup } from 'react-leaflet'
+import { Marker, Polyline, Popup } from 'react-leaflet'
 import type { Arrow, LocationData, Segment } from '@/types/data'
 import { getDistanceBetweenPoints } from '@/utils'
 import type { Log, LogRecord } from '@/parse/types'
 import { interpolateHsl } from 'd3-interpolate'
+import { StartIcon } from '../icons/StartIcon'
 
 // Types
 export interface GetSegmentConfigOptions {
@@ -14,7 +15,9 @@ export interface GetSegmentConfigOptions {
   toSec: number
 }
 
-type GetSegmentConfig = (options: GetSegmentConfigOptions) => Segment['config']
+export type GetSegmentConfig = (
+  options: GetSegmentConfigOptions,
+) => Segment['config']
 
 interface PathArrowSegment {
   arrows: Arrow[]
@@ -163,6 +166,26 @@ const MapLogPathRenderer: FC<Props> = ({
     return [...segments].reverse()
   }, [segments])
 
+  const flightModeChangePoints: { loc: LocationData; fm: string }[] =
+    useMemo(() => {
+      const points: { loc: LocationData; fm: string }[] = []
+      if (!log?.records?.length) return points
+
+      for (let i = 0; i < log.records.length; i++) {
+        const record = log.records[i]
+        const prevFm = points[points.length - 1]
+
+        if (record.flightMode !== prevFm?.fm) {
+          points.push({
+            loc: record.coordinates,
+            fm: record.flightMode,
+          })
+        }
+      }
+
+      return points
+    }, [log])
+
   return (
     <>
       {segmentsReversersed.map((segment, index) => (
@@ -224,6 +247,15 @@ const MapLogPathRenderer: FC<Props> = ({
             })}
         </div>
       ))}
+      {flightModeChangePoints.map((point, index) => {
+        return (
+          <Marker key={index} position={point.loc} icon={StartIcon}>
+            <Popup>
+              <div>Flight mode: {point.fm}</div>
+            </Popup>
+          </Marker>
+        )
+      })}
     </>
   )
 }

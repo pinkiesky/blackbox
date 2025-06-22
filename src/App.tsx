@@ -1,4 +1,10 @@
-import { type ChangeEvent, useEffect, useMemo, useState } from 'react'
+import {
+  type ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { Box, Button, type SxProps, Typography } from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { useLocalStorage } from '@uidotdev/usehooks'
@@ -14,6 +20,9 @@ import type { Log, LogStatistics } from './parse/types'
 import { ValueStatCalculator } from './math/ValueStatCalculator'
 import { DistanceCalculator } from './math/DistanceCalculator'
 import { DerivativeCalculator } from './math/DerivativeCalculator'
+import type { GetSegmentConfigOptions } from './components/MapPolylines/MapLogPathRenderer'
+import { interpolateHsl } from 'd3-interpolate'
+import type { Segment } from './types/data'
 
 const styles: Record<string, SxProps> = {
   app: {
@@ -45,6 +54,9 @@ function App() {
   const { setLog } = useLogStore()
 
   const [rawLog, setRawLog] = useState<Log | null>(null)
+  const [selectedRange, setSelectedRange] = useState<[number, number] | null>(
+    null,
+  )
 
   useEffect(() => {
     if (!data) {
@@ -153,7 +165,12 @@ function App() {
   }
 
   const onRangeSelect = ({ range }: DraggableSelectEvent) => {
-    console.log(range)
+    if (range[0] === range[1]) {
+      setSelectedRange(null)
+      return
+    }
+
+    setSelectedRange(range)
   }
 
   const onUploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -167,6 +184,46 @@ function App() {
   const clearData = () => {
     saveData(null)
   }
+
+  const lchCb = useCallback(
+    (opts: GetSegmentConfigOptions): Segment['config'] => {
+      if (selectedRange) {
+        const [start, end] = selectedRange
+        if (
+          opts.usedRecords[0].flightTimeSec < start ||
+          opts.usedRecords[opts.usedRecords.length - 1].flightTimeSec > end
+        ) {
+          return {
+            opacity: 0.5,
+            color: 'gray',
+            weight: 1,
+          }
+        }
+      }
+      if (!globalLogStatistic) {
+        return {
+          opacity: 0.5,
+          color: 'gray',
+          weight: 1,
+        }
+      }
+
+      const avgSegment =
+        opts.usedRecords.reduce((acc, record) => {
+          return record.altitudeM + acc
+        }, 0) / opts.usedRecords.length
+      const color = interpolateHsl(
+        'green',
+        'red',
+      )(avgSegment / globalLogStatistic.altitude.max)
+      return {
+        opacity: 0.7,
+        color,
+        weight: 5,
+      }
+    },
+    [globalLogStatistic, selectedRange],
+  )
 
   return (
     <>
@@ -203,7 +260,7 @@ function App() {
               <MapControls clear={clearData} />
             </Box>
 
-            <Map stat={globalLogStatistic!} />
+            <Map segmentDataCallback={lchCb} />
           </Box>
           <Box sx={styles.chart}>
             <LogChart onSelect={onRangeSelect} />

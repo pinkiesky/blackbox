@@ -202,6 +202,7 @@ describe('resampleData', () => {
     recieverLinkQuality: 0,
     recieverSSIdB: 0,
     transmitterSSIdB: 0,
+    flightMode: '',
   })
 
   it('should return empty array for empty input', () => {

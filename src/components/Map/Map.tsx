@@ -1,28 +1,19 @@
-import {
-  type FC,
-  useEffect,
-  useState,
-  useCallback,
-  type MouseEvent,
-} from 'react'
+import { type FC, useEffect, useState, type MouseEvent } from 'react'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 import { IconButton, Menu, MenuItem, ListItemText, Box } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import type { CSSProperties } from '@mui/material'
 import 'leaflet-providers'
-import { interpolateHsl } from 'd3-interpolate'
-import type { Segment } from '@/types/data'
 import { useLogStore } from '@/store/log.ts'
 import { useMapPositions } from '@/hooks/useMapPositions'
 import { StartIcon } from '@/components/icons/StartIcon'
 import { FinishIcon } from '@/components/icons/FinishIcon'
 import MapLogPathRenderer, {
-  type GetSegmentConfigOptions,
+  type GetSegmentConfig,
 } from '../MapPolylines/MapLogPathRenderer'
-import type { LogStatistics } from '@/parse/types'
 
 interface Props {
-  stat: LogStatistics
+  segmentDataCallback: GetSegmentConfig
 }
 
 interface MapProvider {
@@ -85,32 +76,13 @@ const styles: Record<string, CSSProperties> = {
   },
 }
 
-const Map: FC<Props> = ({ stat }) => {
+const Map: FC<Props> = ({ segmentDataCallback }) => {
   const { log } = useLogStore()
   const [selectedProvider, setSelectedProvider] = useState<MapProvider>(
     mapProviders[0],
   )
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
-
-  const lchCb = useCallback(
-    (opts: GetSegmentConfigOptions): Segment['config'] => {
-      const avgSegment =
-        opts.usedRecords.reduce((acc, record) => {
-          return record.altitudeM + acc
-        }, 0) / opts.usedRecords.length
-      const color = interpolateHsl(
-        'green',
-        'red',
-      )(avgSegment / stat.altitude.max)
-      return {
-        opacity: 0.7,
-        color,
-        weight: 5,
-      }
-    },
-    [stat],
-  )
 
   const {
     startPosition,
@@ -196,7 +168,7 @@ const Map: FC<Props> = ({ stat }) => {
               </Marker>
             )}
 
-            <MapLogPathRenderer log={log!} getConfig={lchCb} />
+            <MapLogPathRenderer log={log!} getConfig={segmentDataCallback} />
           </MapContainer>
         </Box>
       )}

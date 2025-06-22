@@ -105,6 +105,7 @@ export interface LogRecord {
   yawRad: number
   recieverSSIdB: number
   transmitterSSIdB: number
+  flightMode: string
 
   $resample?: {
     deviationSec?: number // deviation from the original record in seconds

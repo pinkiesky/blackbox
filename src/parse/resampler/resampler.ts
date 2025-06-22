@@ -224,6 +224,7 @@ export function resampleData(
         secondRecord.transmitterSSIdB,
         fraction,
       ),
+      flightMode: firstRecord.flightMode,
       $resample: {
         deviationSec: minDeviationSec,
         interpolated: true,

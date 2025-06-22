@@ -1,5 +1,4 @@
 import { type FC, useEffect, useRef, useState } from 'react'
-import { format } from 'date-fns'
 import { Line } from 'react-chartjs-2'
 import { Box } from '@mui/material'
 import { useLogStore } from '@/store/log.ts'
@@ -18,13 +17,13 @@ const LogChart: FC<Props> = ({ onSelect }) => {
 
   const lineRef = useRef<any>(null)
   const [altitudeM, setAltitudeM] = useState<number[]>([])
-  const [dates, setDates] = useState<string[]>([])
+  const [dates, setDates] = useState<number[]>([])
 
   useEffect(() => {
     if (!log) return
 
     const altitudeMData = log.records.map((log) => log.altitudeM)
-    const dates = log.records.map((log) => format(log.date, 'HH:mm:ss'))
+    const dates = log.records.map((log) => log.flightTimeSec)
 
     setAltitudeM(altitudeMData)
     setDates(dates)
