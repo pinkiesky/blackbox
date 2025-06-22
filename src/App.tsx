@@ -5,11 +5,10 @@ import {
   Container,
   Grid,
   IconButton,
-  type SxProps,
   Typography,
 } from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
-import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined'
+import HighlightOff from '@mui/icons-material/HighlightOff'
 import { useLocalStorage } from '@uidotdev/usehooks'
 import { useLogStore } from '@/store/log.ts'
 import type { DraggableSelectEvent } from '@/utils/chart'
@@ -23,22 +22,6 @@ import VisuallyHiddenInput from '@/components/ui/VisuallyHiddenInput.tsx'
 import Map from '@/components/Map/Map.tsx'
 import LogChart from '@/components/LogChart/LogChart.tsx'
 import Stats from '@/components/Stats/Stats.tsx'
-
-const styles: Record<string, SxProps> = {
-  app: {
-    margin: '1rem',
-  },
-  title: {
-    textAlign: 'left',
-    fontSize: '1.5rem',
-  },
-  map: {
-    marginTop: '1rem',
-  },
-  chart: {
-    marginTop: '1rem',
-  },
-}
 
 function App() {
   const [data, saveData] = useLocalStorage<string | null>('RawData2', null)
@@ -169,7 +152,7 @@ function App() {
   return (
     <>
       {!log && (
-        <Box sx={styles.app}>
+        <Box>
           <h1>Blackbox</h1>
 
           <Button
@@ -191,10 +174,10 @@ function App() {
       )}
 
       {log && globalLogStatistic && (
-        <Container sx={styles.app} maxWidth="xl">
-          <Grid container spacing={1} alignItems="center">
+        <Container maxWidth="xl">
+          <Grid container spacing={1} alignItems="center" sx={{ mb: 2 }}>
             <Grid>
-              <Typography sx={styles.title}>
+              <Typography fontSize={24}>
                 {log.title || 'Unknown Log'}
               </Typography>
             </Grid>
@@ -205,20 +188,18 @@ function App() {
                 size="small"
                 onClick={clearData}
               >
-                <CloseOutlinedIcon />
+                <HighlightOff />
               </IconButton>
             </Grid>
           </Grid>
-
           <Grid spacing={3}>
-            <Grid width="100%" sx={styles.map}>
+            <Grid sx={{ mt: 1 }}>
               <Grid container minHeight={500} spacing={1}>
                 <Map stat={globalLogStatistic} />
                 <Stats stat={globalLogStatistic} />
               </Grid>
             </Grid>
-
-            <Grid width="100%" sx={styles.chart}>
+            <Grid sx={{ mt: 3 }}>
               <LogChart onSelect={onRangeSelect} />
             </Grid>
           </Grid>

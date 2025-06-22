@@ -15,6 +15,7 @@ import {
   Divider,
   FormControlLabel,
   Checkbox,
+  styled,
 } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import type { CSSProperties } from '@mui/material'
@@ -43,19 +44,21 @@ const styles: Record<string, CSSProperties> = {
     minHeight: '500px',
     borderRadius: '4px',
   },
-  settingsContainer: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 1000,
-    backgroundColor: 'white',
-    borderRadius: '4px',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-  },
-  mapContainer: {
-    position: 'relative',
-  },
 }
+
+const StyledSettingsContainer = styled(Box)({
+  position: 'absolute',
+  top: 10,
+  right: 10,
+  zIndex: 1000,
+  backgroundColor: 'white',
+  borderRadius: '4px',
+  boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+})
+
+const StyledContainer = styled(Box)({
+  position: 'relative',
+})
 
 const Map: FC<Props> = ({ stat }) => {
   const { log } = useLogStore()
@@ -116,8 +119,8 @@ const Map: FC<Props> = ({ stat }) => {
   return (
     <>
       {centerPosition && (
-        <Box style={styles.mapContainer}>
-          <Box style={styles.settingsContainer}>
+        <StyledContainer>
+          <StyledSettingsContainer>
             <IconButton
               onClick={handleSettingsClick}
               size="small"
@@ -175,7 +178,8 @@ const Map: FC<Props> = ({ stat }) => {
                 />
               </MenuItem>
             </Menu>
-          </Box>
+          </StyledSettingsContainer>
+
           <MapContainer center={centerPosition} zoom={16} style={styles.map}>
             <TileLayer
               key={selectedProvider.name}
@@ -196,7 +200,7 @@ const Map: FC<Props> = ({ stat }) => {
 
             <MapLogPathRenderer getConfig={lchCb} />
           </MapContainer>
-        </Box>
+        </StyledContainer>
       )}
     </>
   )

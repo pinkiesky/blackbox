@@ -1,28 +1,26 @@
 import { type ChangeEvent, type FC, Fragment } from 'react'
+import PopupState, { bindTrigger, bindMenu } from 'material-ui-popup-state'
 import {
   Box,
   Checkbox,
-  type CSSProperties,
   FormControlLabel,
   IconButton,
   Menu,
   MenuItem,
+  styled,
 } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { useChartSettingsStore } from '@/store/chart-settings.ts'
-import PopupState, { bindTrigger, bindMenu } from 'material-ui-popup-state'
 
-const styles: Record<string, CSSProperties> = {
-  container: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 1000,
-    backgroundColor: 'white',
-    borderRadius: '4px',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-  },
-}
+const FloatingSettingsBox = styled(Box)({
+  position: 'absolute',
+  top: 10,
+  right: 10,
+  zIndex: 1000,
+  backgroundColor: 'white',
+  borderRadius: '4px',
+  boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+})
 
 const LogChartSettings: FC = () => {
   const { settings, setSettings } = useChartSettingsStore()
@@ -40,7 +38,7 @@ const LogChartSettings: FC = () => {
     <PopupState variant="popover" popupId="demo-popup-menu">
       {(popupState) => (
         <Fragment>
-          <Box sx={styles.container}>
+          <FloatingSettingsBox>
             <IconButton
               size="small"
               sx={{ margin: 0.2 }}
@@ -48,7 +46,7 @@ const LogChartSettings: FC = () => {
             >
               <SettingsIcon fontSize="small" />
             </IconButton>
-          </Box>
+          </FloatingSettingsBox>
           <Menu {...bindMenu(popupState)}>
             <MenuItem>
               <FormControlLabel
