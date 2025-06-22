@@ -5,7 +5,7 @@ import {
   circularInterpolate,
   circularInterpolateRadians,
 } from './resampler'
-import type { LogRecord } from '@/types/data'
+import type { LogRecord } from '../types'
 
 describe('linearInterpolate', () => {
   it('should interpolate correctly between two values', () => {

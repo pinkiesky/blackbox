@@ -1,11 +1,6 @@
 import { useState } from 'react'
-import type {
-  LocationData,
-  Log,
-  LogRecord,
-  LogStatistics,
-  Segment,
-} from '@/types/data'
+import type { LocationData, Segment } from '@/types/data'
+import type { Log, LogRecord, LogStatistics } from '@/parse/types'
 
 interface UseMapPositionsReturn {
   /* States */
