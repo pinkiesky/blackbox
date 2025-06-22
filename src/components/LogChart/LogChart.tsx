@@ -46,7 +46,7 @@ const LogChart: FC<Props> = ({ onSelect }) => {
   }
 
   return (
-    <Box sx={{ position: 'relative' }}>
+    <Box sx={{ position: 'relative', minHeight: '322px' }}>
       <Line
         ref={lineRef}
         height="65%"

@@ -36,7 +36,7 @@ const styles: Record<string, SxProps> = {
     marginTop: '1rem',
   },
   chart: {
-    marginTop: '0.5rem',
+    marginTop: '1rem',
   },
 }
 
@@ -210,15 +210,15 @@ function App() {
             </Grid>
           </Grid>
 
-          <Grid container spacing={3} flexDirection="column">
-            <Grid size="grow" sx={styles.map} minWidth="1536px">
+          <Grid spacing={3}>
+            <Grid width="100%" sx={styles.map}>
               <Grid container minHeight={500} spacing={1}>
                 <Map stat={globalLogStatistic} />
                 <Stats stat={globalLogStatistic} />
               </Grid>
             </Grid>
 
-            <Grid size="grow" sx={styles.chart} minWidth="1563px">
+            <Grid width="100%" sx={styles.chart}>
               <LogChart onSelect={onRangeSelect} />
             </Grid>
           </Grid>
