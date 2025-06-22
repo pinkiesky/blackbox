@@ -25,6 +25,7 @@ interface PathArrowSegment {
 interface Props {
   log: Log
   getConfig: GetSegmentConfig
+  enableUglyArrows?: boolean
 }
 
 // Constants
@@ -33,8 +34,8 @@ const DEFAULT_PATH_OPTIONS: PathOptions = {
   weight: 4,
   opacity: 1,
   stroke: true,
-  lineJoin: 'miter',
-  lineCap: 'butt',
+  lineJoin: 'round',
+  lineCap: 'round',
 }
 
 export function createTrianglePolyline(arrow: Arrow): LatLngLiteral[] {
@@ -72,7 +73,11 @@ export function createTrianglePolyline(arrow: Arrow): LatLngLiteral[] {
 const MAX_SEGMENT_DISTANCE_M = 100
 const MAX_ARROW_DISTANCE_M = 75
 
-const MapLogPathRenderer: FC<Props> = ({ log, getConfig }) => {
+const MapLogPathRenderer: FC<Props> = ({
+  log,
+  getConfig,
+  enableUglyArrows = false,
+}) => {
   const segments: PathArrowSegment[] = useMemo(() => {
     if (!log?.records?.length) return []
 
@@ -154,18 +159,22 @@ const MapLogPathRenderer: FC<Props> = ({ log, getConfig }) => {
     return segments
   }, [log, getConfig])
 
+  const segmentsReversersed = useMemo(() => {
+    return [...segments].reverse()
+  }, [segments])
+
   return (
     <>
-      {segments.map((segment, index) => (
+      {segmentsReversersed.map((segment, index) => (
         <div key={index}>
           <Polyline
             positions={segment.points}
             pathOptions={{
               ...DEFAULT_PATH_OPTIONS,
-              opacity: 0.3,
+              opacity: 0.8,
               color: 'black',
               weight:
-                (segment.config.weight ?? DEFAULT_PATH_OPTIONS.weight!) + 3,
+                (segment.config.weight ?? DEFAULT_PATH_OPTIONS.weight!) + 4,
             }}
           >
             {segment.config.popoverText && (
@@ -191,27 +200,28 @@ const MapLogPathRenderer: FC<Props> = ({ log, getConfig }) => {
             )}
           </Polyline>
 
-          {segment.arrows.map((arrow, arrowIndex) => {
-            const points = createTrianglePolyline(arrow)
-            const color = interpolateHsl(
-              segment.config.color ?? DEFAULT_PATH_OPTIONS.color!,
-              'black',
-            )(0.5)
-            return (
-              <Polyline
-                key={arrowIndex}
-                positions={points}
-                pathOptions={{
-                  ...DEFAULT_PATH_OPTIONS,
-                  color: color,
-                  weight: 1,
-                  fill: true,
-                  stroke: false,
-                  fillOpacity: 0.9,
-                }}
-              />
-            )
-          })}
+          {enableUglyArrows &&
+            segment.arrows.map((arrow, arrowIndex) => {
+              const points = createTrianglePolyline(arrow)
+              const color = interpolateHsl(
+                segment.config.color ?? DEFAULT_PATH_OPTIONS.color!,
+                'black',
+              )(0.5)
+              return (
+                <Polyline
+                  key={arrowIndex}
+                  positions={points}
+                  pathOptions={{
+                    ...DEFAULT_PATH_OPTIONS,
+                    color: color,
+                    weight: 1,
+                    fill: true,
+                    stroke: false,
+                    fillOpacity: 0.9,
+                  }}
+                />
+              )
+            })}
         </div>
       ))}
     </>

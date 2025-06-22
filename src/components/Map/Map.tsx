@@ -106,7 +106,7 @@ const Map: FC<Props> = ({ stat }) => {
       return {
         opacity: 0.7,
         color,
-        weight: 7,
+        weight: 5,
       }
     },
     [stat],
