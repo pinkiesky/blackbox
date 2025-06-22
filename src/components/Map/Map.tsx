@@ -39,8 +39,7 @@ const styles: Record<string, CSSProperties> = {
   map: {
     width: '100%',
     height: '100%',
-    minWidth: '1236px',
-    minHeight: '500px',
+    minWidth: '1236px', // Minimum width to prevent width 0
     borderRadius: '4px',
   },
   settingsContainer: {

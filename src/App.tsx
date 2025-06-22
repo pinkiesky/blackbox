@@ -212,11 +212,12 @@ function App() {
 
           <Grid container spacing={3} flexDirection="column">
             <Grid size="grow" sx={styles.map} minWidth="1536px">
-              <Grid container spacing={1}>
+              <Grid container minHeight={500} spacing={1}>
                 <Map stat={globalLogStatistic} />
                 <Stats stat={globalLogStatistic} />
               </Grid>
             </Grid>
+
             <Grid size="grow" sx={styles.chart} minWidth="1563px">
               <LogChart onSelect={onRangeSelect} />
             </Grid>
