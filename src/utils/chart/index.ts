@@ -1,7 +1,7 @@
 import type { ChartSettings } from '@/store/chart-settings.ts'
 
 export interface DraggableSelectEvent {
-  range: [string, string]
+  range: [number, number]
 }
 
 export interface GetDraggableSelectRangeOptions {

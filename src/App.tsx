@@ -1,12 +1,12 @@
-import { type ChangeEvent, useEffect, useMemo } from 'react'
 import {
-  Box,
-  Button,
-  Container,
-  Grid,
-  IconButton,
-  Typography,
-} from '@mui/material'
+  type ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import { Box, Button, Typography } from '@mui/material'
+import { Container, Grid, IconButton } from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import HighlightOff from '@mui/icons-material/HighlightOff'
 import { useLocalStorage } from '@uidotdev/usehooks'
@@ -14,18 +14,24 @@ import { useLogStore } from '@/store/log.ts'
 import type { DraggableSelectEvent } from '@/utils/chart'
 import { resampleData } from './parse/resampler/resampler'
 import { parseEdgeTxLogs } from './parse/edgetx/parseEdgeTxLog'
-import type { Log, LogStatistics } from './parse/types'
-import { ValueStatCalculator } from './math/ValueStatCalculator'
-import { DistanceCalculator } from './math/DistanceCalculator'
-import { DerivativeCalculator } from './math/DerivativeCalculator'
+import type { Log, LogRecord, LogStatistics } from './parse/types'
 import VisuallyHiddenInput from '@/components/ui/VisuallyHiddenInput.tsx'
 import Map from '@/components/Map/Map.tsx'
 import LogChart from '@/components/LogChart/LogChart.tsx'
 import Stats from '@/components/Stats/Stats.tsx'
+import { calculateStatistic } from './math/calculateStatistic'
+import { interpolateHsl } from 'd3-interpolate'
+import type { GetSegmentConfigOptions } from './components/MapPolylines/MapLogPathRenderer'
+import type { Segment } from './types/data'
 
 function App() {
   const [data, saveData] = useLocalStorage<string | null>('RawData2', null)
-  const { setLog, rawLog, setRawLog } = useLogStore()
+  const { setLog } = useLogStore()
+
+  const [rawLog, setRawLog] = useState<Log | null>(null)
+  const [selectedRange, setSelectedRange] = useState<[number, number] | null>(
+    null,
+  )
 
   useEffect(() => {
     if (!data) {
@@ -69,64 +75,28 @@ function App() {
       return null
     }
 
-    const altitudeCalculator = new ValueStatCalculator()
-    const speedCalculator = new ValueStatCalculator()
-    const transmitterPowerCalculator = new ValueStatCalculator()
-    const transmitterQualityCalculator = new ValueStatCalculator()
-    const distanceCalculator = new DistanceCalculator()
-    const rollDerivativeCalculator = new DerivativeCalculator()
+    const stats = calculateStatistic(rawLog)!
 
-    for (let i = 0; i < rawLog.records.length; i++) {
-      const record = rawLog.records[i]
-      const prevRecord = rawLog.records[i - 1] || null
-      const weight = prevRecord
-        ? record.flightTimeSec - prevRecord.flightTimeSec
-        : 1
-
-      altitudeCalculator.addValueWeighted(record.altitudeM, weight)
-      speedCalculator.addValueWeighted(record.groundSpeedKmh, weight)
-      transmitterPowerCalculator.addValueWeighted(
-        record.transmitterPowerMw,
-        weight,
-      )
-      transmitterQualityCalculator.addValueWeighted(
-        record.transmitterLinkQuality,
-        weight,
-      )
-      distanceCalculator.addPoint(record.coordinates, record.altitudeM)
-      rollDerivativeCalculator.addValue(record.rollRad, weight)
-    }
-
-    console.log('Altitude stats:', altitudeCalculator.getValue())
-    console.log('Speed stats:', speedCalculator.getValue())
-    console.log(
-      'Transmitter Power stats:',
-      transmitterPowerCalculator.getValue(),
-    )
-    console.log(
-      'Transmitter Quality stats:',
-      transmitterQualityCalculator.getValue(),
-    )
-    console.log(
-      'Total distance:',
-      distanceCalculator.getDistance().totalDistanceM,
-      'm',
-    )
-    console.log(
-      'Roll Derivative stats:',
-      rollDerivativeCalculator.getDerivativeData(),
-    )
-
-    const stats: LogStatistics = {
-      altitude: altitudeCalculator.getValue(),
-      groundSpeedKmh: speedCalculator.getValue(),
-      transmitterPowerMw: transmitterPowerCalculator.getValue(),
-      transmitterLinkQuality: transmitterQualityCalculator.getValue(),
-      totalDistanceM: distanceCalculator.getDistance().totalDistanceM,
-    }
+    console.log('Altitude stats:', stats?.altitude)
+    console.log('Speed stats:', stats?.groundSpeedKmh)
 
     return stats
   }, [rawLog])
+
+  useMemo<LogStatistics | null>(() => {
+    if (!rawLog || !selectedRange) {
+      return null
+    }
+
+    const [start, end] = selectedRange
+    const stats = calculateStatistic(rawLog, {
+      fromSec: start,
+      untilSec: end,
+    })!
+    console.log('Selected range stats:', stats)
+
+    return stats
+  }, [rawLog, selectedRange])
 
   const parseRawData = async (rawData: string): Promise<Log> => {
     console.log('Parsing raw data...', rawData.length, 'characters')
@@ -134,7 +104,12 @@ function App() {
   }
 
   const onRangeSelect = ({ range }: DraggableSelectEvent) => {
-    console.log(range)
+    if (range[0] === range[1]) {
+      setSelectedRange(null)
+      return
+    }
+
+    setSelectedRange(range)
   }
 
   const onUploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -148,6 +123,46 @@ function App() {
   const clearData = () => {
     saveData(null)
   }
+
+  const lchCb = useCallback(
+    (opts: GetSegmentConfigOptions): Segment['config'] => {
+      if (selectedRange) {
+        const [start, end] = selectedRange
+        if (
+          opts.usedRecords[0].flightTimeSec < start ||
+          opts.usedRecords[opts.usedRecords.length - 1].flightTimeSec > end
+        ) {
+          return {
+            opacity: 0.5,
+            color: 'gray',
+            weight: 1,
+          }
+        }
+      }
+      if (!globalLogStatistic) {
+        return {
+          opacity: 0.5,
+          color: 'gray',
+          weight: 1,
+        }
+      }
+
+      const avgSegment =
+        opts.usedRecords.reduce((acc: number, record: LogRecord) => {
+          return record.altitudeM + acc
+        }, 0) / opts.usedRecords.length
+      const color = interpolateHsl(
+        'green',
+        'red',
+      )(avgSegment / globalLogStatistic.altitude.max)
+      return {
+        opacity: 0.7,
+        color,
+        weight: 5,
+      }
+    },
+    [globalLogStatistic, selectedRange],
+  )
 
   return (
     <>
@@ -195,7 +210,7 @@ function App() {
           <Grid spacing={3}>
             <Grid sx={{ mt: 1 }}>
               <Grid container minHeight={500} spacing={1}>
-                <Map stat={globalLogStatistic} />
+                <Map segmentDataCallback={lchCb} />
                 <Stats stat={globalLogStatistic} />
               </Grid>
             </Grid>
