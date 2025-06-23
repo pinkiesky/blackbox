@@ -128,12 +128,12 @@ function App() {
     (opts: GetSegmentConfigOptions): Segment['config'] => {
       if (selectedRange) {
         const [start, end] = selectedRange
-        if (
-          opts.usedRecords[0].flightTimeSec < start ||
-          opts.usedRecords[opts.usedRecords.length - 1].flightTimeSec > end
-        ) {
+        const isStartWithinRange = opts.fromSec >= start && opts.toSec <= end
+        const isEndWithinRange = opts.fromSec <= end && opts.toSec >= start
+
+        if (!isStartWithinRange && !isEndWithinRange) {
           return {
-            opacity: 0.5,
+            opacity: 0.8,
             color: 'gray',
             weight: 1,
           }
@@ -141,7 +141,7 @@ function App() {
       }
       if (!globalLogStatistic) {
         return {
-          opacity: 0.5,
+          opacity: 0.8,
           color: 'gray',
           weight: 1,
         }
@@ -156,7 +156,7 @@ function App() {
         'red',
       )(avgSegment / globalLogStatistic.altitude.max)
       return {
-        opacity: 0.7,
+        opacity: 1,
         color,
         weight: 5,
       }
