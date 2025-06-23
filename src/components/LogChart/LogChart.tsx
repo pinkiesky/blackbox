@@ -1,4 +1,4 @@
-import { type FC, useEffect, useRef, useState } from 'react'
+import { type FC, useMemo, useRef } from 'react'
 import { Line } from 'react-chartjs-2'
 import { Box, styled } from '@mui/material'
 import { useLogStore } from '@/store/log.ts'
@@ -6,8 +6,10 @@ import {
   type DraggableSelectEvent,
   getDraggableSelectRangeConfig,
 } from '@/utils/chart'
-import type { ScriptableContext } from 'chart.js'
 import LogChartSettings from '@/components/LogChartSettings/LogChartSettings.tsx'
+import { useChartSettingsStore } from '@/store/chart-settings'
+import type { LogRecord } from '@/parse/types'
+import { resampleData } from '@/parse/resampler/resampler'
 
 interface Props {
   onSelect: (event: DraggableSelectEvent) => void
@@ -22,32 +24,55 @@ const LogChart: FC<Props> = ({ onSelect }) => {
   const { log } = useLogStore()
 
   const lineRef = useRef<any>(null)
-  const [altitudeM, setAltitudeM] = useState<number[]>([])
-  const [dates, setDates] = useState<number[]>([])
+  const { settings } = useChartSettingsStore()
 
-  useEffect(() => {
-    if (!log) return
+  const simpleLogFields: (keyof LogRecord)[] = [
+    'altitudeM',
+    'groundSpeedKmh',
+    'verticalSpeedMps',
+    'amperageCurrentA',
+    'transmitterLinkQuality',
+    'recieverLinkQuality',
+  ]
 
-    const altitudeMData = log.records.map((log) => log.altitudeM)
-    const dates = log.records.map((log) => log.flightTimeSec)
+  const [datasets, dates, fieldColors] = useMemo(() => {
+    if (!log) return []
+    const resampled = resampleData(log.records, 3)
 
-    setAltitudeM(altitudeMData)
-    setDates(dates)
-  }, [log])
+    const datasets = []
+    const fieldColors: Record<string, string> = {}
 
-  function getBackgroundColor(context: ScriptableContext<'line'>) {
-    if (!context.chart.chartArea) return
+    const availableColors = [
+      '#00ff00',
+      '#ff0000',
+      '#0000ff',
+      '#ffff00',
+      '#ff00ff',
+      '#00ffff',
+      '#ff8800',
+    ]
 
-    const {
-      ctx,
-      chartArea: { top, bottom },
-    } = context.chart
-    const gradient = ctx.createLinearGradient(0, top, 0, bottom)
-    gradient.addColorStop(0, 'rgb(29,132,255)')
-    gradient.addColorStop(1, 'rgba(173,215,255,0)')
+    for (const field of simpleLogFields) {
+      if (!settings[field]) continue
 
-    return gradient
-  }
+      const color = availableColors.pop()!
+      fieldColors[field] = color
+
+      const data = resampled.map((record) => Number(record[field]))
+      datasets.push({
+        label: field,
+        data,
+        pointRadius: 1,
+        pointHoverRadius: 5,
+        borderColor: color,
+        fill: true,
+        yAxisID: field,
+      })
+    }
+
+    const dates = resampled.map((record) => record.flightTimeSec)
+    return [datasets, dates, fieldColors]
+  }, [log, settings])
 
   return (
     <StyledBox>
@@ -57,25 +82,46 @@ const LogChart: FC<Props> = ({ onSelect }) => {
         options={{
           responsive: true,
           plugins: {
+            legend: {
+              display: false,
+            },
             // @ts-ignore
             draggableSelectRange: getDraggableSelectRangeConfig({
               onSelect,
             }),
           },
+          scales: {
+            x: {
+              display: false,
+            },
+            ...Object.fromEntries(
+              simpleLogFields
+                .filter((field) => settings[field])
+                .map((field, index) => [
+                  field,
+                  {
+                    type: 'linear',
+                    display: true,
+                    position: index % 2 === 0 ? 'left' : 'right',
+                    title: {
+                      display: true,
+                      text: field,
+                      color: fieldColors?.[field] || '#000000',
+                    },
+                    ticks: {
+                      color: fieldColors?.[field] || '#000000',
+                    },
+                    grid: {
+                      drawOnChartArea: index === 0,
+                    },
+                  },
+                ]),
+            ),
+          },
         }}
         data={{
           labels: dates,
-          datasets: [
-            {
-              label: 'Altitude',
-              data: altitudeM,
-              pointRadius: 0,
-              pointHoverRadius: 0,
-              borderColor: '#004688',
-              fill: true,
-              backgroundColor: getBackgroundColor,
-            },
-          ],
+          datasets: datasets!,
         }}
       />
 
